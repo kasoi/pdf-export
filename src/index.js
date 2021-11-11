@@ -11,9 +11,10 @@ const options = {
   height: 600
 };
 
-const path = './assets/cert.pdf';
+const rootPath = process.cwd();
+const pdfPath = './assets/cert.pdf';
 
-const storeAsImage = fromPath(path, options);
+const storeAsImage = fromPath(pdfPath, options);
 const pageToConvertAsImage = 1;
 
 const imagesFolder = "./images";
@@ -28,11 +29,14 @@ app.get('/image', async (req, res) => {
   try {
     const image = await storeAsImage(pageToConvertAsImage);
     console.log('ok');
-    res.status(200).sendFile(image);
+    res.status(200).sendFile(rootPath + '/' + image);
   } catch (exception) {
     console.log('not ok:', exception.message);
     res.status(401).send(`Error happened: ${exception.message}`);
   }
+});
+app.get('/pdf', async (req, res) => {
+  res.status(200).sendFile(rootPath + `/${pdfPath}`);
 });
 
 app.listen(3020);
