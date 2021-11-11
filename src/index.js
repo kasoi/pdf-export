@@ -29,7 +29,8 @@ app.get('/image', async (req, res) => {
   try {
     const image = await storeAsImage(pageToConvertAsImage);
     console.log('ok');
-    res.status(200).sendFile(rootPath + '/' + image);
+    console.log('image object:', image);
+    res.status(200).sendFile(rootPath + '/' + image.path);
   } catch (exception) {
     console.log('not ok:', exception.message);
     res.status(401).send(`Error happened: ${exception.message}`);
