@@ -23,7 +23,7 @@ if (!fs.existsSync(imagesFolder)) fs.mkdirSync(imagesFolder);
 const app = express();
 
 app.get('/', (req, res) => {
-  res.status(200).send("Type /image to get file");
+  res.status(200).send("Type /image to get file, asshole");
 });
 app.get('/image', async (req, res) => {
   try {
