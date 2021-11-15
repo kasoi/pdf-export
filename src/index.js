@@ -1,6 +1,7 @@
 import { fromPath } from "pdf2pic";
 import fs from "fs";
 import express from 'express';
+import bodyParser from 'body-parser';
 
 const options = {
   density: 100,
@@ -21,6 +22,7 @@ const imagesFolder = "./images";
 if (!fs.existsSync(imagesFolder)) fs.mkdirSync(imagesFolder);
 
 const app = express();
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 app.get('/', (req, res) => {
   res.status(200).send("Type /image to get file");
