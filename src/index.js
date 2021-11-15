@@ -27,10 +27,12 @@ app.get('/', (req, res) => {
 });
 app.get('/image', async (req, res) => {
   try {
-    const image = await storeAsImage(pageToConvertAsImage);
+    //const image = await storeAsImage(pageToConvertAsImage);
+    const image = await storeAsImage(1, true);
     console.log('ok');
     console.log('image object:', image);
-    res.status(200).sendFile(rootPath + '/' + image.path);
+    //res.status(200).sendFile(rootPath + '/' + image.path);
+    res.status(200).send(image);
   } catch (exception) {
     console.log('not ok:', exception.message);
     res.status(401).send(`Error happened: ${exception.message}`);
