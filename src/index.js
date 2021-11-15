@@ -45,7 +45,7 @@ app.get('/pdf', async (req, res) => {
   res.status(200).sendFile(rootPath + `/${pdfPath}`);
 });
 
-app.post('/submit', multipart.array(), async (req, res) => {
+app.post('/submit', multer().array(), async (req, res) => {
   console.log(req.body);
   res.status(200).send('ok');
 });
