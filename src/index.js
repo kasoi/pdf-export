@@ -4,8 +4,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import multer from 'multer';
 
-const upload = multer({ dest: './uploads/' })
-
 const options = {
   density: 100,
   saveFilename: "cert",
@@ -47,8 +45,7 @@ app.get('/pdf', async (req, res) => {
   res.status(200).sendFile(rootPath + `/${pdfPath}`);
 });
 
-app.post('/submit', upload.single('upload'), async (req, res) => {
-  console.log(req.file);
+app.post('/submit', multer().single(), async (req, res) => {
   console.log(req.body);
   res.status(200).send('ok');
 });
