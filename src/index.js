@@ -43,8 +43,8 @@ app.get('/pdf', async (req, res) => {
 });
 
 app.get('/submit', async (req, res) => {
-  console.log(req);
-  //res.status(200).send(req);
+  console.log(req.body);
+  res.status(200);
 });
 
 app.listen(3020);
