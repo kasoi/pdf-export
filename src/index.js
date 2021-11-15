@@ -23,7 +23,7 @@ if (!fs.existsSync(imagesFolder)) fs.mkdirSync(imagesFolder);
 const app = express();
 
 app.get('/', (req, res) => {
-  res.status(200).send("Type /image to get file, asshole");
+  res.status(200).send("Type /image to get file");
 });
 app.get('/image', async (req, res) => {
   try {
@@ -42,7 +42,7 @@ app.get('/pdf', async (req, res) => {
   res.status(200).sendFile(rootPath + `/${pdfPath}`);
 });
 
-app.get('/submit', async (req, res) => {
+app.put('/submit', async (req, res) => {
   console.log(req.body);
   res.status(200).send('ok');
 });
