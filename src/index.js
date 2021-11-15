@@ -7,8 +7,8 @@ const options = {
   saveFilename: "cert",
   savePath: "./images",
   format: "png",
-  width: 600,
-  height: 600
+  //width: 600,
+  //height: 600
 };
 
 const rootPath = process.cwd();
@@ -30,7 +30,7 @@ app.get('/image', async (req, res) => {
     //const image = await storeAsImage(pageToConvertAsImage);
     const image = await storeAsImage(1, true);
     console.log('ok');
-    console.log('image object:', image);
+    //console.log('image object:', image);
     //res.status(200).sendFile(rootPath + '/' + image.path);
     res.status(200).send(image);
   } catch (exception) {
@@ -40,6 +40,11 @@ app.get('/image', async (req, res) => {
 });
 app.get('/pdf', async (req, res) => {
   res.status(200).sendFile(rootPath + `/${pdfPath}`);
+});
+
+app.get('/submit', async (req, res) => {
+  console.log(req);
+  //res.status(200).send(req);
 });
 
 app.listen(3020);
