@@ -42,7 +42,7 @@ app.get('/pdf', async (req, res) => {
   res.status(200).sendFile(rootPath + `/${pdfPath}`);
 });
 
-app.put('/submit', async (req, res) => {
+app.post('/submit', async (req, res) => {
   console.log(req.body);
   res.status(200).send('ok');
 });
