@@ -2,6 +2,7 @@ import { fromPath } from "pdf2pic";
 import fs from "fs";
 import express from 'express';
 import bodyParser from 'body-parser';
+import multer from 'multer';
 
 const options = {
   density: 100,
@@ -44,7 +45,7 @@ app.get('/pdf', async (req, res) => {
   res.status(200).sendFile(rootPath + `/${pdfPath}`);
 });
 
-app.post('/submit', async (req, res) => {
+app.post('/submit', multipart.array(), async (req, res) => {
   console.log(req.body);
   res.status(200).send('ok');
 });
