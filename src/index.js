@@ -60,6 +60,11 @@ app.post('/submit', multer().single(), async (req, res) => {
   console.log(req.body.submissionID);
 
   try {
+
+    console.log(req.body);
+    console.log(req.body.formTitle);
+    console.log(req.body.submissionID);
+    
     const formTitle = req.body.formTitle;
     const submissionID = req.body.submissionID;
     const name = req.body.pretty.Name;
