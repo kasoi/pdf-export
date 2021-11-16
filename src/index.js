@@ -55,22 +55,13 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 app.post('/submit', multer().single(), async (req, res) => {
-  console.log(req.body);
-  console.log(req.body.formTitle);
-  console.log(req.body.submissionID);
+
+  const formTitle = req.body.formTitle;
+  const submissionID = req.body.submissionID;
+  const name = req.body.pretty.Name;
+  const url = req.body.rawRequest.fileUpload[0];
 
   try {
-
-    console.log(req.body);
-    console.log(req.body.formTitle);
-    console.log(req.body.submissionID);
-    
-    const formTitle = req.body.formTitle;
-    const submissionID = req.body.submissionID;
-    const name = req.body.pretty.Name;
-    const url = req.body.rawRequest.fileUpload[0];
-
-    console.log("after assign", submissionID);
 
     console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, url = ${url}, name = ${name}`);
 
