@@ -65,6 +65,8 @@ app.post('/submit', multer().single(), async (req, res) => {
     const name = req.body.pretty.Name;
     const url = req.body.rawRequest.fileUpload[0];
 
+    console.log("after assign", submissionID);
+
     console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, url = ${url}, name = ${name}`);
 
     https.get(url, (res) => {
