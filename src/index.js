@@ -55,7 +55,9 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 app.post('/submit', multer().single(), async (req, res) => {
-  //console.log(req.body);
+  console.log(req.body);
+  console.log(req.body.formTitle);
+  console.log(req.body.submissionID);
 
   try {
     const formTitle = req.body.formTitle;
