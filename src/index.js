@@ -51,13 +51,13 @@ const timeNow = () => {
 // };
 
 const getSmallImageOptions = (width, height) => {
-  const dpi = 72;
+  const dpi = 48;
   const ratio = width / height;
   return getImageOptions(800, ratio, dpi);
 };
 
 const getLargeImageOptions = (width, height) => {
-  const dpi = 200;
+  const dpi = 150;
   const ratio = width / height;
   return getImageOptions(2160, ratio, dpi);
 };
