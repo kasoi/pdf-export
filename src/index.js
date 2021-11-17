@@ -59,7 +59,9 @@ app.post('/submit', multer().single(), async (req, res) => {
   const formTitle = req.body.formTitle;
   const submissionID = req.body.submissionID;
   const name = req.body.pretty.Name;
-  const url = req.body.rawRequest.fileUpload[0];
+  const rawRequest = JSON.parse(req.body.rawRequest);
+  console.log(rawRequest);
+  const url = rawRequest.JsfileUpload[0];
 
   try {
 
