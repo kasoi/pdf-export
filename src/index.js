@@ -4,11 +4,9 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import multer from 'multer';
 import got from 'got';
-
 import PDFParser from 'pdf2json';
-let pdfParser = new PDFParser();
-
 import util from 'util';
+
 var logFile = fs.createWriteStream('log.txt', { flags: 'a' });
   // Or 'w' to truncate the file every time the process starts.
 var logStdout = process.stdout;
@@ -66,7 +64,7 @@ const getLargeImageOptions = (width, height) => {
 
 const getImageOptions = (width, ratio, dpi) => {
   const options = {
-    //width : Math.round(width),
+    width : Math.round(width),
     //height : Math.round(width / ratio),
     density : dpi,
   };
@@ -101,6 +99,7 @@ app.post('/submit', multer().single(), async (req, res) => {
     .on('close', async () => {
       console.log('File written!');
 
+      let pdfParser = new PDFParser();
       pdfParser.loadPDF(path);
       pdfParser.on("pdfParser_dataReady", async pdfData => {
 
