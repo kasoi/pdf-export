@@ -68,7 +68,7 @@ const getImageOptions = (width, ratio, dpi) => {
     height : Math.round(width / ratio),
     density : dpi,
     format : 'jpg',
-    quality : 100
+    quality : 70
   };
 
   return options;
