@@ -104,10 +104,10 @@ app.post('/submit', multer().single(), async (req, res) => {
 
         console.log('sending to php');
 
-        got(submitUrl, payload).then(response => {
+        got.post(submitUrl, { json : payload }).then(response => {
           console.log(response.body);
           console.log('sent to php');
-          res.status(200).send('ok');
+          res.status(200).send(response.body);
         }).catch(error => {
           throw error;
         });
@@ -143,6 +143,24 @@ if (!fs.existsSync(imagesFolder)) fs.mkdirSync(imagesFolder);
 
 app.get('/', (req, res) => {
   res.status(200).send("Type /image to get file");
+});
+
+app.get('/post', (req, res) => {
+
+  const payload = JSON.stringify({
+    smallImage : "sdfdfdfdsfdsfdffd",
+    largeImage : "base64Large.base64"
+  });
+
+  console.log(payload);
+
+  got.post(submitUrl, { json : payload }).then(response => {
+    console.log(response.body);
+    console.log('sent to php');
+    res.status(200).send(response.body);
+  }).catch(error => {
+    throw error;
+  });
 });
 app.get('/image', async (req, res) => {
   try {
