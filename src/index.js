@@ -102,7 +102,7 @@ app.post('/submit', multer().single(), async (req, res) => {
           name : name,
         });
 
-        console.log(payload);
+        console.log('sending to php');
 
         got(submitUrl, payload).then(response => {
           console.log(response.body);
