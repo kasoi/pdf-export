@@ -96,11 +96,17 @@ app.post('/submit', multer().single(), async (req, res) => {
 
         //console.log(`base64Small = ${base64Small}, base64Large = ${base64Large}`);
 
-        const payload = JSON.stringify({
+        // const payload = JSON.stringify({
+        //   smallImage : base64Small.base64,
+        //   largeImage : base64Large.base64,
+        //   name : name,
+        // });
+
+        const payload = {
           smallImage : base64Small.base64,
           largeImage : base64Large.base64,
           name : name,
-        });
+        };
 
         console.log('sending to php');
 
