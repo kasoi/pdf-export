@@ -45,7 +45,7 @@ const getLargeImageOptions = (width, height) => {
 const getImageOptions = (width, height, dpi) => {
   const options = {
     width : Math.round(width / 4.5 * dpi),
-    width : Math.round(height / 4.5 * dpi),
+    height : Math.round(height / 4.5 * dpi),
   };
 
   return options;
