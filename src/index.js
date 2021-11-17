@@ -94,7 +94,7 @@ app.post('/submit', multer().single(), async (req, res) => {
         storeAsImage = fromPath(path, getLargeImageOptions(width, height));
         const base64Large = await storeAsImage(1, true); 
 
-        console.log(`base64Small = ${base64Small}, base64Large = ${base64Large}`);
+        //console.log(`base64Small = ${base64Small}, base64Large = ${base64Large}`);
 
         const payload = JSON.stringify({
           smallImage : base64Small,
