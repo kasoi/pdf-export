@@ -52,6 +52,8 @@ const getImageOptions = (width, height, dpi) => {
   return options;
 };
 
+const submitUrl = 'https://www.posterpresentations.com/developer/submit/index.php';
+
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
@@ -67,63 +69,43 @@ app.post('/submit', multer().single(), async (req, res) => {
 
     console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, url = ${url}, name = ${name}`);
 
-    https.get(url, (res) => {
-
-      const path = `./temp/temp.pdf`; 
-      const filePath = fs.createWriteStream(path);
-      res.pipe(filePath);
-      filePath.on('finish', async () => {
-          filePath.close();
-
-          let storeAsImage = fromPath(path, getSmallImageOptions);
-          const base64Small = await storeAsImage(1, true); 
-
-          storeAsImage = fromPath(path, getLargeImageOptions);
-          const base64Large = await storeAsImage(1, true); 
-
-          const payload = JSON.stringify({
-            smallImage : base64Small,
-            largeImage : base64Large,
-            name : name,
-          });
-
-          got('https://www.posterpresentations.com/developer/submit/index.php', payload).then(response => {
-            console.log(response.body);
-            res.status(200).send('ok');
-          }).catch(error => {
-            throw error;
-          });
+    const path = process.cwd() + `\\temp.pdf`; 
+    console.log(path);
   
-          // const options = {
-          //   hostname: 'https://www.posterpresentations.com',
-          //   //port: 443,
-          //   path: '/developer/submit/index.php',
-          //   method: 'POST',
-          //   headers: {
-          //     'Content-Type': 'application/json',
-          //     'Content-Length': payload.length
-          //   }
-          // }
+    got.stream(url)
+    .pipe(fs.createWriteStream(path))
+    .on('close', async () => {
+      console.log('File written!');
 
-          // const req = https.request(options);
+      pdfParser.on("pdfParser_dataReady", pdfData => {
 
-          // req.on('error', error => {
-          //   throw(error);
-          // })
+        const width = pdfData.Pages[0].Width; // pdf width
+        const height = pdfData.Pages[0].Height; // page height
 
-          // req.write(data)
-          // req.end()
+        let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+        const base64Small = await storeAsImage(1, true); 
 
-          // res.status(200).send('ok');
-      })
+        storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+        const base64Large = await storeAsImage(1, true); 
+
+        const payload = JSON.stringify({
+          smallImage : base64Small,
+          largeImage : base64Large,
+          name : name,
+        });
+
+        got(submitUrl, payload).then(response => {
+          console.log(response.body);
+          console.log('sent to php');
+          res.status(200).send('ok');
+        }).catch(error => {
+          throw error;
+        });
+      });
     });
-
   } catch (exception) {
-
     const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, url = ${url}, exception = ${exception.message}`;
     console.log(errMessage);
-
-
     res.status(401).send(`Error happened: ${exception.message}`);
   }
 });
@@ -166,7 +148,17 @@ app.get('/image', async (req, res) => {
   }
 });
 app.get('/pdf', async (req, res) => {
-  res.status(200).sendFile(rootPath + `/${pdfPath}`);
+  const url = "https:\/\/www.jotform.com\/uploads\/nkzshinnik\/213137293217048\/5129401145011716443\/work.pdf";
+
+  const path = process.cwd() + `\\temp.pdf`; 
+  console.log(path);
+
+  got.stream(url)
+  .pipe(fs.createWriteStream(path))
+  .on('close', function () {
+    console.log('File written!');
+    res.status(200).sendFile(path);
+  });
 });
 
 app.get('/size', async (req, res) => {
