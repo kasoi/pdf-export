@@ -81,7 +81,7 @@ app.post('/submit', multer().single(), async (req, res) => {
       pdfParser.loadPDF(path);
       pdfParser.on("pdfParser_dataReady", async pdfData => {
 
-        console.log(pdfData);
+        //console.log(pdfData);
 
         const width = pdfData.Pages[0].Width; // pdf width
         const height = pdfData.Pages[0].Height; // page height
