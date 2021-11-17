@@ -58,6 +58,8 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 app.post('/submit', multer().single(), async (req, res) => {
 
+  console.log(req.body);
+  
   const formTitle = req.body.formTitle;
   const submissionID = req.body.submissionID;
   const name = req.body.pretty.Name;
@@ -68,7 +70,7 @@ app.post('/submit', multer().single(), async (req, res) => {
 
     console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, url = ${url}, name = ${name}`);
 
-    const path = process.cwd() + `\\temp.pdf`; 
+    const path = process.cwd() + `/temp.pdf`; 
     console.log(path);
   
     got.stream(url)
