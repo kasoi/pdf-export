@@ -59,7 +59,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.post('/submit', multer().single(), async (req, res) => {
 
   console.log(req.body);
-  
+
   const formTitle = req.body.formTitle;
   const submissionID = req.body.submissionID;
   const name = req.body.pretty.Name;
@@ -94,6 +94,8 @@ app.post('/submit', multer().single(), async (req, res) => {
           largeImage : base64Large,
           name : name,
         });
+
+        console.log(payload);
 
         got(submitUrl, payload).then(response => {
           console.log(response.body);
