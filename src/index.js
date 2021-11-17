@@ -46,6 +46,7 @@ const getImageOptions = (width, height, dpi) => {
   const options = {
     width : Math.round(width / 4.5 * dpi),
     height : Math.round(height / 4.5 * dpi),
+    density : dpi,
   };
 
   return options;
@@ -81,8 +82,6 @@ app.post('/submit', multer().single(), async (req, res) => {
       pdfParser.loadPDF(path);
       pdfParser.on("pdfParser_dataReady", async pdfData => {
 
-        //console.log(pdfData);
-
         const width = pdfData.Pages[0].Width; // pdf width
         const height = pdfData.Pages[0].Height; // page height
 
@@ -93,14 +92,6 @@ app.post('/submit', multer().single(), async (req, res) => {
 
         storeAsImage = fromPath(path, getLargeImageOptions(width, height));
         const base64Large = await storeAsImage(1, true); 
-
-        //console.log(`base64Small = ${base64Small}, base64Large = ${base64Large}`);
-
-        // const payload = JSON.stringify({
-        //   smallImage : base64Small.base64,
-        //   largeImage : base64Large.base64,
-        //   name : name,
-        // });
 
         const payload = {
           smallImage : base64Small.base64,
