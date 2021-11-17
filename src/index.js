@@ -89,7 +89,7 @@ app.post('/submit', multer().single(), async (req, res) => {
           const options = {
             hostname: 'https://www.posterpresentations.com',
             //port: 443,
-            path: '/developer/submit/',
+            path: '/developer/submit/index.php',
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
