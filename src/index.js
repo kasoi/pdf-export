@@ -3,7 +3,7 @@ import fs from "fs";
 import express from 'express';
 import bodyParser from 'body-parser';
 import multer from 'multer';
-import https from 'https';
+import got from 'got';
 
 import PDFParser from 'pdf2json';
 let pdfParser = new PDFParser();
@@ -85,28 +85,35 @@ app.post('/submit', multer().single(), async (req, res) => {
             largeImage : base64Large,
             name : name,
           });
+
+          got('https://www.posterpresentations.com/developer/submit/index.php', payload).then(response => {
+            console.log(response.body);
+            res.status(200).send('ok');
+          }).catch(error => {
+            throw error;
+          });
   
-          const options = {
-            hostname: 'https://www.posterpresentations.com',
-            //port: 443,
-            path: '/developer/submit/index.php',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Content-Length': payload.length
-            }
-          }
+          // const options = {
+          //   hostname: 'https://www.posterpresentations.com',
+          //   //port: 443,
+          //   path: '/developer/submit/index.php',
+          //   method: 'POST',
+          //   headers: {
+          //     'Content-Type': 'application/json',
+          //     'Content-Length': payload.length
+          //   }
+          // }
 
-          const req = https.request(options);
+          // const req = https.request(options);
 
-          req.on('error', error => {
-            throw(error);
-          })
+          // req.on('error', error => {
+          //   throw(error);
+          // })
 
-          req.write(data)
-          req.end()
+          // req.write(data)
+          // req.end()
 
-          res.status(200).send('ok');
+          // res.status(200).send('ok');
       })
     });
 
