@@ -32,20 +32,42 @@ const timeNow = () => {
   return new Date().today() + " @ " + new Date().timeNow();
 }
 
+// const getSmallImageOptions = (width, height) => {
+//   const dpi = 72;
+//   return getImageOptions(width, height, dpi);
+// };
+
+// const getLargeImageOptions = (width, height) => {
+//   const dpi = 200;
+//   return getImageOptions(width, height, dpi);
+// };
+
+// const getImageOptions = (width, height, dpi) => {
+//   const options = {
+//     width : Math.round(width / 4.5 * dpi),
+//     height : Math.round(height / 4.5 * dpi),
+//     density : dpi,
+//   };
+
+//   return options;
+// };
+
 const getSmallImageOptions = (width, height) => {
   const dpi = 72;
-  return getImageOptions(width, height, dpi);
+  const ratio = width / height;
+  return getImageOptions(800, ratio, dpi);
 };
 
 const getLargeImageOptions = (width, height) => {
   const dpi = 200;
-  return getImageOptions(width, height, dpi);
+  const ratio = width / height;
+  return getImageOptions(2160, ratio, dpi);
 };
 
-const getImageOptions = (width, height, dpi) => {
+const getImageOptions = (width, ratio, dpi) => {
   const options = {
-    width : Math.round(width / 4.5 * dpi),
-    height : Math.round(height / 4.5 * dpi),
+    width : Math.round(width),
+    height : Math.round(width / ratio),
     density : dpi,
   };
 
