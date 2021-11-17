@@ -59,15 +59,15 @@ const getSmallImageOptions = (width, height) => {
 };
 
 const getLargeImageOptions = (width, height) => {
-  const dpi = 200;
+  const dpi = 300;
   const ratio = width / height;
   return getImageOptions(2160, ratio, dpi);
 };
 
 const getImageOptions = (width, ratio, dpi) => {
   const options = {
-    width : Math.round(width),
-    height : Math.round(width / ratio),
+    //width : Math.round(width),
+    //height : Math.round(width / ratio),
     density : dpi,
   };
 
