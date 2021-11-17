@@ -3,7 +3,6 @@ import fs from "fs";
 import express from 'express';
 import bodyParser from 'body-parser';
 import multer from 'multer';
-import https from 'https';
 import got from 'got';
 
 import PDFParser from 'pdf2json';
@@ -77,7 +76,7 @@ app.post('/submit', multer().single(), async (req, res) => {
     .on('close', async () => {
       console.log('File written!');
 
-      pdfParser.on("pdfParser_dataReady", pdfData => {
+      pdfParser.on("pdfParser_dataReady", async pdfData => {
 
         const width = pdfData.Pages[0].Width; // pdf width
         const height = pdfData.Pages[0].Height; // page height
