@@ -68,6 +68,7 @@ app.post('/submit', multer().single(), async (req, res) => {
   const rawRequest = JSON.parse(req.body.rawRequest);
 
   const name = rawRequest.q1_yourName.first + ' ' + rawRequest.q1_yourName.last;
+  const posterid = rawRequest.q10_posterid;
   const email = rawRequest.q2_yourEmail;
   const abstract = rawRequest.q7_posterAbstract;
   const title = rawRequest.q22_theTitle;
@@ -111,6 +112,9 @@ app.post('/submit', multer().single(), async (req, res) => {
           const payload = {
             smallImage: base64Small.base64,
             largeImage: base64Large.base64,
+
+            posterid : posterid,
+            eventid : posterid.replace(/([A-Z]+)\d+/g, "$1"),
             email : email,
             abstract : abstract,
             title : title,
@@ -169,6 +173,11 @@ if (!fs.existsSync(imagesFolder)) fs.mkdirSync(imagesFolder);
 
 app.get('/', (req, res) => {
   res.status(200).send("Type /image to get file");
+});
+
+app.get('/regex', (req, res) => {
+  const str = "STPE20"
+  res.status(200).send(str.replace(/([A-Z]+)\d+/g, "$1"));
 });
 
 app.get('/post', (req, res) => {
