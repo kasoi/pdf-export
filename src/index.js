@@ -8,7 +8,7 @@ import PDFParser from 'pdf2json';
 import util from 'util';
 
 var logFile = fs.createWriteStream('log.txt', { flags: 'a' });
-  // Or 'w' to truncate the file every time the process starts.
+// Or 'w' to truncate the file every time the process starts.
 var logStdout = process.stdout;
 
 console.log = function () {
@@ -17,38 +17,18 @@ console.log = function () {
 }
 console.error = console.log;
 
-Date.prototype.today = function () { 
-  return ((this.getDate() < 10)?"0":"") + this.getDate() +"/"+(((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1) +"/"+ this.getFullYear();
+Date.prototype.today = function () {
+  return ((this.getDate() < 10) ? "0" : "") + this.getDate() + "/" + (((this.getMonth() + 1) < 10) ? "0" : "") + (this.getMonth() + 1) + "/" + this.getFullYear();
 }
 
 Date.prototype.timeNow = function () {
-   return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
+  return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes() + ":" + ((this.getSeconds() < 10) ? "0" : "") + this.getSeconds();
 }
 
 const timeNow = () => {
-  var currentdate = new Date(); 
+  var currentdate = new Date();
   return new Date().today() + " @ " + new Date().timeNow();
 }
-
-// const getSmallImageOptions = (width, height) => {
-//   const dpi = 72;
-//   return getImageOptions(width, height, dpi);
-// };
-
-// const getLargeImageOptions = (width, height) => {
-//   const dpi = 200;
-//   return getImageOptions(width, height, dpi);
-// };
-
-// const getImageOptions = (width, height, dpi) => {
-//   const options = {
-//     width : Math.round(width / 4.5 * dpi),
-//     height : Math.round(height / 4.5 * dpi),
-//     density : dpi,
-//   };
-
-//   return options;
-// };
 
 const getSmallImageOptions = (width, height) => {
   const dpi = 48;
@@ -64,11 +44,11 @@ const getLargeImageOptions = (width, height) => {
 
 const getImageOptions = (width, ratio, dpi) => {
   const options = {
-    width : Math.round(width),
-    height : Math.round(width / ratio),
-    density : dpi,
-    format : 'jpg',
-    quality : 90
+    width: Math.round(width),
+    height: Math.round(width / ratio),
+    density: dpi,
+    format: 'jpg',
+    quality: 90
   };
 
   return options;
@@ -85,59 +65,82 @@ app.post('/submit', multer().single(), async (req, res) => {
 
   const formTitle = req.body.formTitle;
   const submissionID = req.body.submissionID;
-  const name = req.body.pretty.Name;
   const rawRequest = JSON.parse(req.body.rawRequest);
-  const url = rawRequest.fileUpload[0];
+
+  const name = rawRequest.q1_yourName.first + ' ' + rawRequest.q1_yourName.last;
+  const email = rawRequest.q2_yourEmail;
+  const abstract = rawRequest.q7_posterAbstract;
+  const title = rawRequest.q22_theTitle;
+  const authors = rawRequest.q23_thePoster;
+  const affiliates = rawRequest.q24_thePoster24;
+  const keywords = rawRequest.q5_keywords;
+
+  const narrationWavUrl = rawRequest.q20_addA ? "https\:\/\/jotform.com" + rawRequest.q20_addA : "";
+  const pdfUrl = rawRequest.uploadYour3[0];
 
   try {
 
-    console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, url = ${url}, name = ${name}`);
+    console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, name = ${name}`);
 
-    const path = process.cwd() + `/temp.pdf`; 
+    const path = process.cwd() + `/temp.pdf`;
     console.log(path);
-  
-    got.stream(url)
-    .pipe(fs.createWriteStream(path))
-    .on('close', async () => {
-      console.log('File written!');
 
-      let pdfParser = new PDFParser();
-      pdfParser.loadPDF(path);
-      pdfParser.on("pdfParser_dataReady", async pdfData => {
+    got.stream(pdfUrl)
+      .pipe(fs.createWriteStream(path))
+      .on('close', async () => {
+        console.log('File written!');
 
-        const width = pdfData.Pages[0].Width; // pdf width
-        const height = pdfData.Pages[0].Height; // page height
+        let pdfParser = new PDFParser();
+        pdfParser.loadPDF(path);
+        pdfParser.on("pdfParser_dataReady", async pdfData => {
 
-        console.log(`width = ${width}, height = ${height}`);
+          const width = pdfData.Pages[0].Width; // pdf width
+          const height = pdfData.Pages[0].Height; // page height
 
-        console.log(getSmallImageOptions(width, height));
-        console.log(getLargeImageOptions(width, height));
+          console.log(`width = ${width}, height = ${height}`);
 
-        let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
-        const base64Small = await storeAsImage(1, true); 
+          console.log(getSmallImageOptions(width, height));
+          console.log(getLargeImageOptions(width, height));
 
-        storeAsImage = fromPath(path, getLargeImageOptions(width, height));
-        const base64Large = await storeAsImage(1, true); 
+          let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+          const base64Small = await storeAsImage(1, true);
 
-        const payload = {
-          smallImage : base64Small.base64,
-          largeImage : base64Large.base64,
-          name : name,
-        };
+          storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+          const base64Large = await storeAsImage(1, true);
 
-        console.log('sending to php');
+          const payload = {
+            smallImage: base64Small.base64,
+            largeImage: base64Large.base64,
+            email : email,
+            abstract : abstract,
+            title : title,
+            authors : authors,
+            affiliates : affiliates,
+            keywords : keywords,
+          
+            narrationWavUrl : narrationWavUrl,
+            pdfUrl : pdfUrl,
+          };
 
-        got.post(submitUrl, { json : payload }).then(response => {
-          console.log(response.body);
-          console.log('sent to php');
-          res.status(200).send(response.body);
-        }).catch(error => {
-          throw error;
+          fs.writeFile("./test-payload.txt", JSON.stringify(payload), function(err) {
+            if (err) {
+                console.log(err);
+            }
+          });
+
+          console.log('sending to php');
+
+          got.post(submitUrl, { json: payload }).then(response => {
+            console.log(response.body);
+            console.log('sent to php');
+            res.status(200).send(response.body);
+          }).catch(error => {
+            throw error;
+          });
         });
       });
-    });
   } catch (exception) {
-    const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, url = ${url}, exception = ${exception.message}`;
+    const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
     console.log(errMessage);
     res.status(401).send(`Error happened: ${exception.message}`);
   }
@@ -171,13 +174,13 @@ app.get('/', (req, res) => {
 app.get('/post', (req, res) => {
 
   const payload = JSON.stringify({
-    smallImage : "sdfdfdfdsfdsfdffd",
-    largeImage : "base64Large.base64"
+    smallImage: "sdfdfdfdsfdsfdffd",
+    largeImage: "base64Large.base64"
   });
 
   console.log(payload);
 
-  got.post(submitUrl, { json : payload }).then(response => {
+  got.post(submitUrl, { json: payload }).then(response => {
     console.log(response.body);
     console.log('sent to php');
     res.status(200).send(response.body);
@@ -199,17 +202,17 @@ app.get('/image', async (req, res) => {
   }
 });
 app.get('/pdf', async (req, res) => {
-  const url = "https:\/\/www.jotform.com\/uploads\/nkzshinnik\/213137293217048\/5129401145011716443\/work.pdf";
+  const pdfUrl = "https:\/\/www.jotform.com\/uploads\/nkzshinnik\/213137293217048\/5129401145011716443\/work.pdf";
 
-  const path = process.cwd() + `\\temp.pdf`; 
+  const path = process.cwd() + `\\temp.pdf`;
   console.log(path);
 
-  got.stream(url)
-  .pipe(fs.createWriteStream(path))
-  .on('close', function () {
-    console.log('File written!');
-    res.status(200).sendFile(path);
-  });
+  got.stream(pdfUrl)
+    .pipe(fs.createWriteStream(path))
+    .on('close', function () {
+      console.log('File written!');
+      res.status(200).sendFile(path);
+    });
 });
 
 app.get('/size', async (req, res) => {
