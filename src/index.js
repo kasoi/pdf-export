@@ -125,11 +125,11 @@ app.post('/submit', multer().single(), async (req, res) => {
             pdfUrl : pdfUrl,
           };
 
-          // fs.writeFile("./test-payload.txt", JSON.stringify(payload), function(err) {
-          //   if (err) {
-          //       console.log(err);
-          //   }
-          // });
+          fs.writeFile("./last-payload.txt", JSON.stringify(payload), function(err) {
+            if (err) {
+                console.log(err);
+            }
+          });
 
           console.log('sending to php');
 
