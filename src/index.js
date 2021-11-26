@@ -7,6 +7,8 @@ import got from 'got';
 import PDFParser from 'pdf2json';
 import util from 'util';
 
+const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
+
 var logFile = fs.createWriteStream('log.txt', { flags: 'a' });
 // Or 'w' to truncate the file every time the process starts.
 var logStdout = process.stdout;
@@ -26,7 +28,6 @@ Date.prototype.timeNow = function () {
 }
 
 const timeNow = () => {
-  var currentdate = new Date();
   return new Date().today() + " @ " + new Date().timeNow();
 }
 
@@ -53,8 +54,6 @@ const getImageOptions = (width, ratio, dpi) => {
 
   return options;
 };
-
-const submitUrl = 'https://www.posterpresentations.com/developer/submit/index.php';
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
@@ -126,11 +125,11 @@ app.post('/submit', multer().single(), async (req, res) => {
             pdfUrl : pdfUrl,
           };
 
-          fs.writeFile("./test-payload.txt", JSON.stringify(payload), function(err) {
-            if (err) {
-                console.log(err);
-            }
-          });
+          // fs.writeFile("./test-payload.txt", JSON.stringify(payload), function(err) {
+          //   if (err) {
+          //       console.log(err);
+          //   }
+          // });
 
           console.log('sending to php');
 
@@ -139,7 +138,7 @@ app.post('/submit', multer().single(), async (req, res) => {
             console.log('sent to php');
             res.status(200).send(response.body);
           }).catch(error => {
-            throw error;
+            console.log(`failed to send to php, error: ${error}`);
           });
         });
       });
@@ -149,6 +148,8 @@ app.post('/submit', multer().single(), async (req, res) => {
     res.status(401).send(`Error happened: ${exception.message}`);
   }
 });
+
+app.listen(3020);
 
 ////////////// test routes ////////////////////////////////
 
@@ -178,6 +179,21 @@ app.get('/', (req, res) => {
 app.get('/regex', (req, res) => {
   const str = "STPE20"
   res.status(200).send(str.replace(/([A-Z]+)\d+/g, "$1"));
+});
+
+app.get('/testsubmit', (req, res) => {
+  const submitUrl = "http://localhost:3000/";
+
+  let rawdata = fs.readFileSync('test-payload.txt');
+  let payload = JSON.parse(rawdata);
+
+  got.post(submitUrl, { json: payload }).then(response => {
+    console.log(response.body);
+    console.log('sent to php');
+    res.status(200).send(response.body);
+  }).catch(error => {
+    throw error;
+  });
 });
 
 app.get('/post', (req, res) => {
@@ -240,5 +256,3 @@ app.get('/size', async (req, res) => {
     res.status(200).send(pdfData);
   });
 });
-
-app.listen(3020);
