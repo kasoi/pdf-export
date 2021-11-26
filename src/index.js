@@ -3,7 +3,7 @@ import fs from "fs";
 import express from 'express';
 import bodyParser from 'body-parser';
 import multer from 'multer';
-import got from 'got';
+import got, { setNonEnumerableProperties } from 'got';
 import PDFParser from 'pdf2json';
 import util from 'util';
 
@@ -133,13 +133,31 @@ app.post('/submit', multer().single(), async (req, res) => {
 
           console.log('sending to php');
 
-          got.post(submitUrl, { json: payload }).then(response => {
-            console.log(response.body);
-            console.log('sent to php');
-            res.status(200).send(response.body);
-          }).catch(error => {
-            console.log(`failed to send to php, error: ${error}`);
-          });
+          let loop = true;
+          let timeout = 60 * 1000;
+          let started = new Date().getTime();
+
+          while(loop && ((new Date().getTime() - started) < timeout)) {
+
+            await got.post(submitUrl, { json: payload }).then(response => {
+              console.log(response.body);
+
+              if(response.body === 'ok') {
+                loop = false;
+              }
+
+              console.log('sent to php');
+              res.status(200).send(response.body);
+            }).catch(error => {
+              console.log(`failed to send to php, error: ${error}`);
+            });
+
+            await sleep(2000);
+          }
+
+          if(loop) {
+            console.log(`timed out sending to php data of [${posterid}]`);
+          }          
         });
       });
   } catch (exception) {
@@ -150,6 +168,12 @@ app.post('/submit', multer().single(), async (req, res) => {
 });
 
 app.listen(3020);
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 ////////////// test routes ////////////////////////////////
 
