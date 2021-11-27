@@ -37,10 +37,25 @@ const getSmallImageOptions = (width, height) => {
   return getImageOptions(800, ratio, dpi);
 };
 
+// const getLargeImageOptions = (width, height) => {
+//   const dpi = 150;
+//   const ratio = width / height;
+//   return getImageOptions(2160, ratio, dpi);
+// };
 const getLargeImageOptions = (width, height) => {
   const dpi = 150;
+  const scale = 90;
+  const inchDivider = 4.5; // divide dimensions by this value to size in inches
   const ratio = width / height;
-  return getImageOptions(2160, ratio, dpi);
+  return getImageOptions(width * scale / inchDivider, ratio, dpi);
+};
+
+const getXLargeImageOptions = (width, height) => {
+  const dpi = 150;
+  const scale = 115;
+  const inchDivider = 4.5; // divide dimensions by this value to size in inches
+  const ratio = width / height;
+  return getImageOptions(width * scale / inchDivider, ratio, dpi);
 };
 
 const getImageOptions = (width, ratio, dpi) => {
@@ -108,9 +123,13 @@ app.post('/submit', multer().single(), async (req, res) => {
           storeAsImage = fromPath(path, getLargeImageOptions(width, height));
           const base64Large = await storeAsImage(1, true);
 
+          storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+          const base64XLarge = await storeAsImage(1, true);
+
           const payload = {
             smallImage: base64Small.base64,
             largeImage: base64Large.base64,
+            xlargeImage: base64XLarge,
 
             posterid : posterid,
             eventid : posterid.replace(/([A-Z]+)\d+/g, "$1"),
@@ -278,5 +297,72 @@ app.get('/size', async (req, res) => {
 
     //res.status(200).send(`Height : ${pdfData.formImage.Height}, Width : ${pdfData.formImage.Width}`);
     res.status(200).send(pdfData);
+  });
+});
+app.get('/convert', async (req, res) => {
+
+  const getSmallImageOptions = (width, height) => {
+    const dpi = 48;
+    const ratio = width / height;
+    return getImageOptions(800, ratio, dpi);
+  };
+  
+  const getLargeImageOptions = (width, height) => {
+    const dpi = 150;
+    const scale = 90;
+    const inchDivider = 4.5; // divide dimensions by this value to size in inches
+    const ratio = width / height;
+    return getImageOptions(width * scale / inchDivider, ratio, dpi);
+  };
+
+  const getXLargeImageOptions = (width, height) => {
+    const dpi = 150;
+    const scale = 115;
+    const inchDivider = 4.5; // divide dimensions by this value to size in inches
+    const ratio = width / height;
+    return getImageOptions(width * scale / inchDivider, ratio, dpi);
+  };
+  
+  const getImageOptions = (width, ratio, dpi) => {
+    const options = {
+      width: Math.round(width),
+      height: Math.round(width / ratio),
+      density: dpi,
+      format: 'jpg',
+      quality: 90,
+      saveFilename: "untitled",
+      savePath: "./images",
+    };
+  
+    return options;
+  };
+
+  const path = process.cwd() + `\\STPE20.pdf`;
+  console.log(path);
+
+  let pdfParser = new PDFParser();
+  pdfParser.loadPDF(path);
+  pdfParser.on("pdfParser_dataReady", async pdfData => {
+
+    const width = pdfData.Pages[0].Width; // pdf width
+    const height = pdfData.Pages[0].Height; // page height
+
+    console.log(`width = ${width}, height = ${height}`);
+
+    //console.log(getSmallImageOptions(width, height));
+    //console.log(getLargeImageOptions(width, height));
+
+    let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+    await storeAsImage(1);
+
+    res.status(200).sendFile(process.cwd() + '/' + image.path);
+
+    storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+    await storeAsImage(1);
+
+    storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+    await storeAsImage(1);
+
+    res.status(200).sendFile(process.cwd() + '/' + image.path);
   });
 });
