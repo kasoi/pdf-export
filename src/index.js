@@ -129,7 +129,7 @@ app.post('/submit', multer().single(), async (req, res) => {
           const payload = {
             smallImage: base64Small.base64,
             largeImage: base64Large.base64,
-            xlargeImage: base64XLarge,
+            xlargeImage: base64XLarge.base64,
 
             posterid : posterid,
             eventid : posterid.replace(/([A-Z]+)\d+/g, "$1"),
