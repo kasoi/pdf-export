@@ -159,7 +159,7 @@ app.post('/submit', multer().single(), async (req, res) => {
 
           while(loop && ((new Date().getTime() - started) < timeout)) {
 
-            console.log(`sending to php...`);
+            console.log(`sending to php... (now = ${new Date().getTime()}, started = ${started})`);
 
             await got.post(submitUrl, { json: payload }).then(response => {
               console.log(response.body);
