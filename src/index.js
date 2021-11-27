@@ -116,6 +116,7 @@ app.post('/submit', multer().single(), async (req, res) => {
 
           console.log(getSmallImageOptions(width, height));
           console.log(getLargeImageOptions(width, height));
+          console.log(getXLargeImageOptions(width, height));
 
           let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
           const base64Small = await storeAsImage(1, true);
@@ -123,7 +124,7 @@ app.post('/submit', multer().single(), async (req, res) => {
           storeAsImage = fromPath(path, getLargeImageOptions(width, height));
           const base64Large = await storeAsImage(1, true);
 
-          storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+          storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
           const base64XLarge = await storeAsImage(1, true);
 
           const payload = {
@@ -150,13 +151,15 @@ app.post('/submit', multer().single(), async (req, res) => {
             }
           });
 
-          console.log('sending to php');
-
           let loop = true;
           let timeout = 60 * 1000;
           let started = new Date().getTime();
 
+          console.log(`submit to php loop`);
+
           while(loop && ((new Date().getTime() - started) < timeout)) {
+
+            console.log(`sending to php...`);
 
             await got.post(submitUrl, { json: payload }).then(response => {
               console.log(response.body);
