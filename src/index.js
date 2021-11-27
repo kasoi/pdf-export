@@ -118,11 +118,17 @@ app.post('/submit', multer().single(), async (req, res) => {
           console.log(getLargeImageOptions(width, height));
           console.log(getXLargeImageOptions(width, height));
 
+          console.log('generating base64Small...')
+
           let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
           const base64Small = await storeAsImage(1, true);
 
+          console.log('generating base64Large...')
+
           storeAsImage = fromPath(path, getLargeImageOptions(width, height));
           const base64Large = await storeAsImage(1, true);
+
+          console.log('generating base64XLarge...')
 
           storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
           const base64XLarge = await storeAsImage(1, true);
@@ -144,6 +150,8 @@ app.post('/submit', multer().single(), async (req, res) => {
             narrationWavUrl : narrationWavUrl,
             pdfUrl : pdfUrl,
           };
+
+          console.log('writing last payload to file');
 
           fs.writeFile("./last-payload.txt", JSON.stringify(payload), function(err) {
             if (err) {
@@ -355,16 +363,22 @@ app.get('/convert', async (req, res) => {
     //console.log(getSmallImageOptions(width, height));
     //console.log(getLargeImageOptions(width, height));
 
-    let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
-    await storeAsImage(1);
+    // let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+    // await storeAsImage(1);
 
-    res.status(200).sendFile(process.cwd() + '/' + image.path);
+    // res.status(200).sendFile(process.cwd() + '/' + image.path);
 
-    storeAsImage = fromPath(path, getLargeImageOptions(width, height));
-    await storeAsImage(1);
+    // storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+    // await storeAsImage(1);
 
-    storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
-    await storeAsImage(1);
+    const storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+    const base64 = await storeAsImage(1, true);
+
+    fs.writeFile("./last-payload.txt", base64, function(err) {
+      if (err) {
+          console.log(err);
+      }
+    });
 
     res.status(200).sendFile(process.cwd() + '/' + image.path);
   });
