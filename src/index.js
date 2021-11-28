@@ -32,7 +32,7 @@ const timeNow = () => {
 }
 
 const getSmallImageOptions = (width, height) => {
-  const dpi = 48;
+  const dpi = 120;
   const ratio = width / height;
   return getImageOptions(800, ratio, dpi);
 };
@@ -43,25 +43,31 @@ const getSmallImageOptions = (width, height) => {
 //   return getImageOptions(2160, ratio, dpi);
 // };
 const getLargeImageOptions = (width, height) => {
-  const dpi = 115;
-  const scale = 90;
+  const dpi = 120;
   const inchDivider = 4.5; // divide dimensions by this value to size in inches
   const ratio = width / height;
-  return getImageOptions(width * scale / inchDivider, ratio, dpi);
+  
+  if(width > height)
+    return getImageOptions(2700, 2700 / ratio, dpi);
+  else
+    return getImageOptions(2700 / ratio, 2700, dpi);
 };
 
 const getXLargeImageOptions = (width, height) => {
-  const dpi = 115;
-  const scale = 115;
+  const dpi = 120;
   const inchDivider = 4.5; // divide dimensions by this value to size in inches
   const ratio = width / height;
-  return getImageOptions(width * scale / inchDivider, ratio, dpi);
+
+  if(width > height)
+    return getImageOptions(3840, 3840 / ratio, dpi);
+  else
+    return getImageOptions(3840 / ratio, 3840, dpi);
 };
 
-const getImageOptions = (width, ratio, dpi) => {
+const getImageOptions = (width, heigth, dpi) => {
   const options = {
     width: Math.round(width),
-    height: Math.round(width / ratio),
+    height: Math.round(heigth),
     density: dpi,
     format: 'jpg',
     quality: 90
