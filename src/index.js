@@ -68,7 +68,7 @@ const getImageOptions = (width, heigth, dpi) => {
     height: Math.round(heigth),
     //density: dpi,
     format: 'jpg',
-    quality: 90
+    quality: 95
   };
 
   return options;
@@ -316,8 +316,8 @@ app.get('/size', async (req, res) => {
 });
 app.get('/convert', async (req, res) => {
 
-  const path = `./assets/STPE20.pdf`;
-  //const path = `./assets/work.pdf`;
+  //const path = `./assets/STPE20.pdf`;
+  const path = `./assets/work.pdf`;
   console.log(path);
 
   let pdfParser = new PDFParser();
