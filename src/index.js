@@ -43,7 +43,7 @@ const getSmallImageOptions = (width, height) => {
 //   return getImageOptions(2160, ratio, dpi);
 // };
 const getLargeImageOptions = (width, height) => {
-  const dpi = 1500;
+  const dpi = 150;
   const ratio = width / height;
   
   if(width > height)
