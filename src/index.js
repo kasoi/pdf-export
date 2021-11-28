@@ -377,6 +377,7 @@ app.get('/convert', async (req, res) => {
         if(response.body === 'ok') {
           loop = false;
           console.log('sent to php');
+          break;
         }
 
         console.log('failed, retrying');
