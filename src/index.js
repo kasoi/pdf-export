@@ -364,6 +364,7 @@ app.get('/convert', async (req, res) => {
     let started = new Date().getTime();
 
     console.log(`submit to php loop`);
+    const submitUrl = 'https://www.posterpresentations.com/developer/submit/image.php';
     //const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
 
     while(loop && ((new Date().getTime() - started) < timeout)) {
@@ -375,9 +376,10 @@ app.get('/convert', async (req, res) => {
 
         if(response.body === 'ok') {
           loop = false;
+          console.log('sent to php');
         }
 
-        console.log('sent to php');
+        console.log('failed, retrying');
         //res.status(200).send(response.body);
       }).catch(error => {
         console.log(`failed to send to php, error: ${error}`);
