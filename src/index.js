@@ -34,7 +34,7 @@ const timeNow = () => {
 const getSmallImageOptions = (width, height) => {
   const dpi = 120;
   const ratio = width / height;
-  return getImageOptions(800, ratio, dpi);
+  return getImageOptions(800, 800 / ratio, dpi);
 };
 
 // const getLargeImageOptions = (width, height) => {
@@ -50,7 +50,7 @@ const getLargeImageOptions = (width, height) => {
   if(width > height)
     return getImageOptions(2700, 2700 / ratio, dpi);
   else
-    return getImageOptions(2700 / ratio, 2700, dpi);
+    return getImageOptions(2700 * ratio, 2700, dpi);
 };
 
 const getXLargeImageOptions = (width, height) => {
@@ -61,7 +61,7 @@ const getXLargeImageOptions = (width, height) => {
   if(width > height)
     return getImageOptions(3840, 3840 / ratio, dpi);
   else
-    return getImageOptions(3840 / ratio, 3840, dpi);
+    return getImageOptions(3840 * ratio, 3840, dpi);
 };
 
 const getImageOptions = (width, heigth, dpi) => {
