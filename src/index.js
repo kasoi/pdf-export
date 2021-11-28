@@ -43,7 +43,7 @@ const getSmallImageOptions = (width, height) => {
 //   return getImageOptions(2160, ratio, dpi);
 // };
 const getLargeImageOptions = (width, height) => {
-  const dpi = 150;
+  const dpi = 200;
   const scale = 90;
   const inchDivider = 4.5; // divide dimensions by this value to size in inches
   const ratio = width / height;
@@ -51,7 +51,7 @@ const getLargeImageOptions = (width, height) => {
 };
 
 const getXLargeImageOptions = (width, height) => {
-  const dpi = 150;
+  const dpi = 300;
   const scale = 115;
   const inchDivider = 4.5; // divide dimensions by this value to size in inches
   const ratio = width / height;
@@ -312,43 +312,7 @@ app.get('/size', async (req, res) => {
 });
 app.get('/convert', async (req, res) => {
 
-  const getSmallImageOptions = (width, height) => {
-    const dpi = 48;
-    const ratio = width / height;
-    return getImageOptions(800, ratio, dpi);
-  };
-  
-  const getLargeImageOptions = (width, height) => {
-    const dpi = 150;
-    const scale = 90;
-    const inchDivider = 4.5; // divide dimensions by this value to size in inches
-    const ratio = width / height;
-    return getImageOptions(width * scale / inchDivider, ratio, dpi);
-  };
-
-  const getXLargeImageOptions = (width, height) => {
-    const dpi = 150;
-    const scale = 115;
-    const inchDivider = 4.5; // divide dimensions by this value to size in inches
-    const ratio = width / height;
-    return getImageOptions(width * scale / inchDivider, ratio, dpi);
-  };
-  
-  const getImageOptions = (width, ratio, dpi) => {
-    const options = {
-      width: Math.round(width),
-      height: Math.round(width / ratio),
-      density: dpi,
-      format: 'jpg',
-      quality: 90,
-      saveFilename: "untitled",
-      savePath: "./images",
-    };
-  
-    return options;
-  };
-
-  const path = process.cwd() + `\\STPE20.pdf`;
+  const path = `./assets/STPE20.pdf`;
   console.log(path);
 
   let pdfParser = new PDFParser();
@@ -360,26 +324,39 @@ app.get('/convert', async (req, res) => {
 
     console.log(`width = ${width}, height = ${height}`);
 
-    //console.log(getSmallImageOptions(width, height));
-    //console.log(getLargeImageOptions(width, height));
+    console.log(getSmallImageOptions(width, height));
+    console.log(getLargeImageOptions(width, height));
+    console.log(getXLargeImageOptions(width, height));
 
-    // let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
-    // await storeAsImage(1);
+    console.log('generating base64Small...')
 
-    // res.status(200).sendFile(process.cwd() + '/' + image.path);
+    let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+    const base64Small = await storeAsImage(1, true);
 
-    // storeAsImage = fromPath(path, getLargeImageOptions(width, height));
-    // await storeAsImage(1);
+    console.log('generating base64Large...')
 
-    const storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
-    const base64 = await storeAsImage(1, true);
+    storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+    const base64Large = await storeAsImage(1, true);
 
-    fs.writeFile("./last-payload.txt", base64, function(err) {
-      if (err) {
-          console.log(err);
-      }
-    });
+    console.log('generating base64XLarge...')
 
-    res.status(200).sendFile(process.cwd() + '/' + image.path);
+    storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+    const base64XLarge = await storeAsImage(1, true);
+
+    console.log('done');
+
+    const payload = {
+      smallImage: base64Small.base64,
+      largeImage: base64Large.base64,
+      xlargeImage: base64XLarge.base64,
+    };
+
+    // fs.writeFile("./last-images.txt", JSON.stringify(payload), function(err) {
+    //   if (err) {
+    //       console.log(err);
+    //   }
+    // });
+
+    res.status(200).send('ok');
   });
 });
