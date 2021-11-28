@@ -52,8 +52,8 @@ const getLargeImageOptions = (width, height) => {
 
 const getXLargeImageOptions = (width, height) => {
   const scale = 115;
-  const dpi = scale / inchDivider;
   const inchDivider = 4.5; // divide dimensions by this value to size in inches
+  const dpi = scale / inchDivider;
   const ratio = width / height;
   return getImageOptions(width * scale / inchDivider, ratio, dpi);
 };
