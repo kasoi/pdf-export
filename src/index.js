@@ -9,7 +9,7 @@ import util from 'util';
 
 const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
 
-var logFile = fs.createWriteStream('log.txt', { flags: 'a' });
+var logFile = fs.createWriteStream('logs.txt', { flags: 'a' });
 // Or 'w' to truncate the file every time the process starts.
 var logStdout = process.stdout;
 
@@ -43,7 +43,7 @@ const getSmallImageOptions = (width, height) => {
 //   return getImageOptions(2160, ratio, dpi);
 // };
 const getLargeImageOptions = (width, height) => {
-  const dpi = 150;
+  const dpi = 48;
   const scale = 90;
   const inchDivider = 4.5; // divide dimensions by this value to size in inches
   const ratio = width / height;
@@ -356,6 +356,37 @@ app.get('/convert', async (req, res) => {
     //       console.log(err);
     //   }
     // });
+
+    let loop = true;
+    let timeout = 60 * 1000;
+    let started = new Date().getTime();
+
+    console.log(`submit to php loop`);
+    const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
+
+    while(loop && ((new Date().getTime() - started) < timeout)) {
+
+      console.log(`sending to php... (now = ${new Date().getTime()}, started = ${started})`);
+
+      await got.post(submitUrl, { json: payload }).then(response => {
+        console.log(response.body);
+
+        if(response.body === 'ok') {
+          loop = false;
+        }
+
+        console.log('sent to php');
+        res.status(200).send(response.body);
+      }).catch(error => {
+        console.log(`failed to send to php, error: ${error}`);
+      });
+
+      await sleep(2000);
+    }
+
+    if(loop) {
+      console.log(`timed out sending to php data of [${posterid}]`);
+    }          
 
     res.status(200).send('ok');
   });
