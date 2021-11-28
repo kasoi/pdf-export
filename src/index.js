@@ -32,7 +32,7 @@ const timeNow = () => {
 }
 
 const getSmallImageOptions = (width, height) => {
-  const dpi = 120;
+  const dpi = 48;
   const ratio = width / height;
   return getImageOptions(800, 800 / ratio, dpi);
 };
@@ -320,8 +320,8 @@ app.get('/size', async (req, res) => {
 });
 app.get('/convert', async (req, res) => {
 
-  //const path = `./assets/STPE20.pdf`;
-  const path = `./assets/TAFP3.pdf`;
+  const path = `./assets/STPE20.pdf`;
+  //const path = `./assets/TAFP3.pdf`;
   console.log(path);
 
   let pdfParser = new PDFParser();
