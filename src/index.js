@@ -51,9 +51,9 @@ const getLargeImageOptions = (width, height) => {
 };
 
 const getXLargeImageOptions = (width, height) => {
+  const dpi = 115;
   const scale = 115;
   const inchDivider = 4.5; // divide dimensions by this value to size in inches
-  const dpi = scale;
   const ratio = width / height;
   return getImageOptions(width * scale / inchDivider, ratio, dpi);
 };
@@ -312,7 +312,8 @@ app.get('/size', async (req, res) => {
 });
 app.get('/convert', async (req, res) => {
 
-  const path = `./assets/STPE20.pdf`;
+  //const path = `./assets/STPE20.pdf`;
+  const path = `./assets/cert.pdf`;
   console.log(path);
 
   let pdfParser = new PDFParser();
