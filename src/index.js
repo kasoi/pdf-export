@@ -45,28 +45,30 @@ const getSmallImageOptions = (width, height) => {
 const getLargeImageOptions = (width, height) => {
   const dpi = 200;
   const ratio = width / height;
+  const maxSize = 2160;
   
   if(width > height)
-    return getImageOptions(2700, 2700 / ratio, dpi);
+    return getImageOptions(maxSize, maxSize / ratio, dpi);
   else
-    return getImageOptions(2700 * ratio, 2700, dpi);
+    return getImageOptions(maxSize * ratio, maxSize, dpi);
 };
 
 const getXLargeImageOptions = (width, height) => {
   const dpi = 150;
   const ratio = width / height;
+  const maxSize = 2700;
 
   if(width > height)
-    return getImageOptions(3840, 3840 / ratio, dpi);
+    return getImageOptions(maxSize, maxSize / ratio, dpi);
   else
-    return getImageOptions(3840 * ratio, 3840, dpi);
+    return getImageOptions(maxSize * ratio, maxSize, dpi);
 };
 
 const getImageOptions = (width, heigth, dpi) => {
   const options = {
     width: Math.round(width),
     height: Math.round(heigth),
-    //density: dpi,
+    density: 100,
     format: 'jpg',
     quality: 95
   };
