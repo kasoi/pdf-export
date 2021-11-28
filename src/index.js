@@ -175,10 +175,8 @@ app.post('/submit', multer().single(), async (req, res) => {
 
               if(response.body === 'ok') {
                 loop = false;
+                console.log('sent to php');
               }
-
-              console.log('sent to php');
-              res.status(200).send(response.body);
             }).catch(error => {
               console.log(`failed to send to php, error: ${error}`);
             });
@@ -377,11 +375,8 @@ app.get('/convert', async (req, res) => {
         if(response.body === 'ok') {
           loop = false;
           console.log('sent to php');
-          break;
         }
 
-        console.log('failed, retrying');
-        //res.status(200).send(response.body);
       }).catch(error => {
         console.log(`failed to send to php, error: ${error}`);
       });
