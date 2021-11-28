@@ -37,13 +37,7 @@ const getSmallImageOptions = (width, height) => {
   return getImageOptions(800, 800 / ratio, dpi);
 };
 
-// const getLargeImageOptions = (width, height) => {
-//   const dpi = 150;
-//   const ratio = width / height;
-//   return getImageOptions(2160, ratio, dpi);
-// };
 const getLargeImageOptions = (width, height) => {
-  //const dpi = 200;
   const ratio = width / height;
   const maxSize = 2160;
   const dpi = maxSize / (width / 4.5);
@@ -55,7 +49,6 @@ const getLargeImageOptions = (width, height) => {
 };
 
 const getXLargeImageOptions = (width, height) => {
-  //const dpi = 150;
   const ratio = width / height;
   const maxSize = 2700;
   const dpi = maxSize / (width / 4.5);
@@ -371,7 +364,7 @@ app.get('/convert', async (req, res) => {
     let started = new Date().getTime();
 
     console.log(`submit to php loop`);
-    const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
+    //const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
 
     while(loop && ((new Date().getTime() - started) < timeout)) {
 
