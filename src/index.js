@@ -43,7 +43,7 @@ const getSmallImageOptions = (width, height) => {
 //   return getImageOptions(2160, ratio, dpi);
 // };
 const getLargeImageOptions = (width, height) => {
-  const dpi = 48;
+  const dpi = 90;
   const scale = 90;
   const inchDivider = 4.5; // divide dimensions by this value to size in inches
   const ratio = width / height;
@@ -53,7 +53,7 @@ const getLargeImageOptions = (width, height) => {
 const getXLargeImageOptions = (width, height) => {
   const scale = 115;
   const inchDivider = 4.5; // divide dimensions by this value to size in inches
-  const dpi = scale / inchDivider;
+  const dpi = scale;
   const ratio = width / height;
   return getImageOptions(width * scale / inchDivider, ratio, dpi);
 };
@@ -376,7 +376,7 @@ app.get('/convert', async (req, res) => {
         }
 
         console.log('sent to php');
-        res.status(200).send(response.body);
+        //res.status(200).send(response.body);
       }).catch(error => {
         console.log(`failed to send to php, error: ${error}`);
       });
