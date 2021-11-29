@@ -31,10 +31,17 @@ const timeNow = () => {
   return new Date().today() + " @ " + new Date().timeNow();
 }
 
+// const getSmallImageOptions = (width, height) => {
+//   const dpi = 48;
+//   const ratio = width / height;
+//   return getImageOptions(800, 800 / ratio, dpi);
+// };
+
 const getSmallImageOptions = (width, height) => {
-  const dpi = 48;
   const ratio = width / height;
-  return getImageOptions(800, 800 / ratio, dpi);
+  const maxSize = 800;
+  const dpi = maxSize / (width / 4.5);
+  return getImageOptions(maxSize, maxSize / ratio, dpi);
 };
 
 const getLargeImageOptions = (width, height) => {
