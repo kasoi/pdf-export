@@ -311,8 +311,8 @@ app.get('/size', async (req, res) => {
 });
 app.get('/convert', async (req, res) => {
 
-  const path = `./assets/STPE20.pdf`;
-  //const path = `./assets/TAFP3.pdf`;
+  //const path = `./assets/STPE20.pdf`;
+  const path = `./assets/TAFP4.pdf`;
   console.log(path);
 
   let pdfParser = new PDFParser();
@@ -362,8 +362,8 @@ app.get('/convert', async (req, res) => {
     let started = new Date().getTime();
 
     console.log(`submit to php loop`);
-    const submitUrl = 'https://www.posterpresentations.com/developer/submit/image.php';
-    //const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
+    //const submitUrl = 'https://www.posterpresentations.com/developer/submit/image.php';
+    const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
 
     while(loop && ((new Date().getTime() - started) < timeout)) {
 
