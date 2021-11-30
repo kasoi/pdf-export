@@ -6,8 +6,13 @@ import multer from 'multer';
 import got, { setNonEnumerableProperties } from 'got';
 import PDFParser from 'pdf2json';
 import util from 'util';
+import { pipeline } from "stream";
 
-const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
+//const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
+const submitUrl = 'https://skatilsya.com/test/dwg/submit/submit.php';
+
+const submissionsCacheFolder = './submissions-cache/';
+const submissionsHistoryFolder = './submissions-history/';
 
 var logFile = fs.createWriteStream('logs.txt', { flags: 'a' });
 // Or 'w' to truncate the file every time the process starts.
@@ -30,12 +35,6 @@ Date.prototype.timeNow = function () {
 const timeNow = () => {
   return new Date().today() + " @ " + new Date().timeNow();
 }
-
-// const getSmallImageOptions = (width, height) => {
-//   const dpi = 48;
-//   const ratio = width / height;
-//   return getImageOptions(800, 800 / ratio, dpi);
-// };
 
 const getSmallImageOptions = (width, height) => {
   const ratio = width / height;
@@ -78,12 +77,173 @@ const getImageOptions = (width, heigth, dpi) => {
   return options;
 };
 
+const saveSubmissionToCache = (body, folder) => {
+  let res = false;
+
+  try {
+
+    if(!fs.existsSync(folder)) {
+      fs.mkdirSync(folder);
+    }
+    fs.writeFileSync(folder + `${body.submissionID}.json`, JSON.stringify(body));
+    res = true;
+  } catch (exception) {
+    const errMessage = `ERR: failed saving submission data to cache [id = ${body.submissionID}], exception = ${exception.message}`;
+    console.log(errMessage);
+  }
+  return res;
+};
+
+function processSubmissionBody(body) {
+
+  const formTitle = body.formTitle;
+  const submissionID = body.submissionID;
+  const rawRequest = JSON.parse(body.rawRequest);
+
+  try {
+
+    const name = rawRequest.q1_yourName.first + ' ' + rawRequest.q1_yourName.last;
+    const posterid = rawRequest.q10_posterid;
+    const email = rawRequest.q2_yourEmail;
+    const abstract = rawRequest.q7_posterAbstract;
+    const title = rawRequest.q22_theTitle;
+    const authors = rawRequest.q23_thePoster;
+    const affiliates = rawRequest.q24_thePoster24;
+    const keywords = rawRequest.q5_keywords;
+
+    const narrationWavUrl = rawRequest.q20_addA ? "https\:\/\/jotform.com" + rawRequest.q20_addA : "";
+    const pdfUrl = rawRequest.uploadYour3[0];
+
+    console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, name = ${name}`);
+
+    const path = process.cwd() + `/temp.pdf`;
+
+    console.log('attemp to download pdf...');
+
+    got.stream(pdfUrl)
+    .pipe(fs.createWriteStream(path))
+    .on('close', async () => {
+      console.log('File written!');
+
+      let pdfParser = new PDFParser();
+      pdfParser.loadPDF(path);
+      pdfParser.on("pdfParser_dataReady", async pdfData => {
+
+        const width = pdfData.Pages[0].Width; // pdf width
+        const height = pdfData.Pages[0].Height; // page height
+
+        console.log(`width = ${width}, height = ${height}`);
+
+        console.log(getSmallImageOptions(width, height));
+        console.log(getLargeImageOptions(width, height));
+        console.log(getXLargeImageOptions(width, height));
+
+        console.log('generating base64Small...')
+
+        let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+        const base64Small = await storeAsImage(1, true);
+
+        console.log('generating base64Large...')
+
+        storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+        const base64Large = await storeAsImage(1, true);
+
+        console.log('generating base64XLarge...')
+
+        storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+        const base64XLarge = await storeAsImage(1, true);
+
+        const payload = {
+          smallImage: base64Small.base64,
+          largeImage: base64Large.base64,
+          xlargeImage: base64XLarge.base64,
+
+          posterid : posterid,
+          eventid : posterid.replace(/([A-Z]+)\d+/g, "$1"),
+          email : email,
+          abstract : abstract,
+          title : title,
+          authors : authors,
+          affiliates : affiliates,
+          keywords : keywords,
+        
+          narrationWavUrl : narrationWavUrl,
+          pdfUrl : pdfUrl,
+        };
+
+        console.log('writing last payload to file');
+
+        fs.writeFile("./last-payload.txt", JSON.stringify(payload), function(err) {
+          if (err) {
+              console.log(err);
+          }
+        });
+
+        let loop = true;
+        let timeout = 60 * 1000;
+        let started = new Date().getTime();
+
+        console.log(`submit to php loop`);
+
+        while(loop && ((new Date().getTime() - started) < timeout)) {
+
+          console.log(`sending to php... (now = ${new Date().getTime()}, started = ${started})`);
+
+          await got.post(submitUrl, { json: payload }).then(response => {
+            console.log(response.body);
+
+            if(response.body === 'ok') {
+              loop = false;
+              console.log('sent to php');
+
+              moveSubmissionToHistory(submissionID, posterid);
+            }
+          }).catch(error => {
+            console.log(`failed to send to php, error: ${error}`);
+          });
+
+          await sleep(2000);
+        }
+
+        if(loop) {
+          console.log(`timed out sending to php data of [${posterid}]`);
+        }        
+      });
+    });
+  } catch (exception) {
+    const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
+    console.log(errMessage);
+  }
+}
+
+function moveSubmissionToHistory(submissionID, posterid) {
+  try {
+    fs.renameSync(submissionsCacheFolder + submissionID + '.json', submissionsHistoryFolder + posterid + '.json');
+    console.log(`moved submission [${posterid}] to history`);
+  } catch (exception) {
+    const errMessage = `ERR: failed to move submission json (submissionID = ${submissionID}, posterid = ${posterid}), exception = ${exception.message}`;
+    console.log(errMessage);
+  }
+}
+
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
+app.post('/submit2', multer().single(), (req, res) => {
+
+  if(saveSubmissionToCache(req.body, submissionsCacheFolder)) {
+
+    res.status(200).send('ok');
+    processSubmissionBody(req.body);
+
+    return;
+  } 
+  res.status(401).send('not ok');
+});
+
 app.post('/submit', multer().single(), async (req, res) => {
 
-  console.log(req.body);
+  //console.log(req.body);
 
   const formTitle = req.body.formTitle;
   const submissionID = req.body.submissionID;
