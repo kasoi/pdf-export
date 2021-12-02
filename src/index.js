@@ -424,3 +424,86 @@ app.post('/submit2', multer().single(), async (req, res) => {
     res.status(401).send(`Error happened: ${exception.message}`);
   }
 });
+
+app.get('/convert', async (req, res) => {
+
+  //const path = `./assets/STPE20.pdf`;
+  const path = `./assets/TAFP4.pdf`;
+  console.log(path);
+
+  let pdfParser = new PDFParser();
+  pdfParser.loadPDF(path);
+  pdfParser.on("pdfParser_dataReady", async pdfData => {
+
+    const width = pdfData.Pages[0].Width; // pdf width
+    const height = pdfData.Pages[0].Height; // page height
+
+    console.log(`width = ${width}, height = ${height}`);
+
+    console.log(getSmallImageOptions(width, height));
+    console.log(getLargeImageOptions(width, height));
+    console.log(getXLargeImageOptions(width, height));
+
+    console.log('generating base64Small...')
+
+    let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+    const base64Small = await storeAsImage(1, true);
+
+    console.log('generating base64Large...')
+
+    storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+    const base64Large = await storeAsImage(1, true);
+
+    console.log('generating base64XLarge...')
+
+    storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+    const base64XLarge = await storeAsImage(1, true);
+
+    console.log('done');
+
+    const payload = {
+      smallImage: base64Small.base64,
+      largeImage: base64Large.base64,
+      xlargeImage: base64XLarge.base64,
+    };
+
+    // fs.writeFile("./last-images.txt", JSON.stringify(payload), function(err) {
+    //   if (err) {
+    //       console.log(err);
+    //   }
+    // });
+
+    let loop = true;
+    let timeout = 60 * 1000;
+    let started = new Date().getTime();
+
+    console.log(`submit to php loop`);
+    //const submitUrl = 'https://www.posterpresentations.com/developer/submit/image.php';
+    const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
+
+    while(loop && ((new Date().getTime() - started) < timeout)) {
+
+      console.log(`sending to php... (now = ${new Date().getTime()}, started = ${started})`);
+
+      await got.post(submitUrl, { json: payload }).then(response => {
+        console.log(response.body);
+
+        if(response.body === 'ok') {
+          loop = false;
+          console.log('sent to php');
+        }
+
+      }).catch(error => {
+        console.log(`failed to send to php, error: ${error}`);
+      });
+
+      await sleep(2000);
+    }
+
+    if(loop) {
+      console.log(`timed out sending to php data of [${posterid}]`);
+    }          
+
+    res.status(200).send('ok');
+  });
+});
