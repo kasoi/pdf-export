@@ -448,25 +448,29 @@ app.get('/convert', async (req, res) => {
 
     console.log('generating base64Small...')
 
-    try
-    {
-    let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
-    const base64Small = await storeAsImage(1, true);
+    const base64Small, base64Large, base64XLarge;
 
-    console.log('generating base64Large...')
+    try {
+      let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+      base64Small = await storeAsImage(1, true);
 
-    storeAsImage = fromPath(path, getLargeImageOptions(width, height));
-    const base64Large = await storeAsImage(1, true);
+      console.log('generating base64Large...')
 
-    console.log('generating base64XLarge...')
+      storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+      base64Large = await storeAsImage(1, true);
 
-    storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
-    const base64XLarge = await storeAsImage(1, true);
+      console.log('generating base64XLarge...')
 
-    console.log('done');
+      storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+      base64XLarge = await storeAsImage(1, true);
+
+      console.log('done');
     }
     catch(err) {
       console.log(err);
+      if(err.code === 'ENOMEM') {
+        //process.exit(1);
+      }
     }
 
     const payload = {
