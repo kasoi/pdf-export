@@ -428,7 +428,7 @@ app.post('/submit2', multer().single(), async (req, res) => {
 app.get('/convert', async (req, res) => {
 
   //const path = `./assets/STPE20.pdf`;
-  const path = `./assets/TAFP4.pdf`;
+  const path = `./assets/2017 finalposterCAPC2 (2).pdf`;
   console.log(path);
 
   let pdfParser = new PDFParser();
