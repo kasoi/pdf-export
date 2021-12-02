@@ -264,7 +264,7 @@ async function processCache() {
   }
 }
 
-setInterval(processCache, 3 * 1000);
+//setInterval(processCache, 3 * 1000);
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
