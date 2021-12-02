@@ -18,6 +18,8 @@ var logFile = fs.createWriteStream('logs.txt', { flags: 'a' });
 // Or 'w' to truncate the file every time the process starts.
 var logStdout = process.stdout;
 
+let inProcess = [];
+
 console.log = function () {
   logFile.write(timeNow() + ' | ' + util.format.apply(null, arguments) + '\n');
   logStdout.write(util.format.apply(null, arguments) + '\n');
@@ -98,6 +100,13 @@ function processSubmissionBody(body) {
 
   const formTitle = body.formTitle;
   const submissionID = body.submissionID;
+
+  if(inProcess.includes(submissionID)) {
+    return;
+  } else {
+    inProcess.push(submissionID);
+  }
+
   const rawRequest = JSON.parse(body.rawRequest);
 
   try {
@@ -198,6 +207,7 @@ function processSubmissionBody(body) {
               console.log('sent to php');
 
               moveSubmissionToHistory(submissionID, posterid);
+              inProcess.splice(inProcess.indexOf(submissionID));
             }
           }).catch(error => {
             console.log(`failed to send to php, error: ${error}`);
@@ -244,6 +254,7 @@ async function processCache() {
         console.log(dirent.name);
 
         const json = JSON.parse(fs.readFileSync(submissionsCacheFolder + dirent.name));
+
         processSubmissionBody(json);
         sleep(2000);
       }
@@ -253,7 +264,7 @@ async function processCache() {
   }
 }
 
-setInterval(processCache, 30 * 1000);
+setInterval(processCache, 3 * 1000);
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
