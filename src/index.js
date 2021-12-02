@@ -448,6 +448,8 @@ app.get('/convert', async (req, res) => {
 
     console.log('generating base64Small...')
 
+    try
+    {
     let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
     const base64Small = await storeAsImage(1, true);
 
@@ -462,6 +464,10 @@ app.get('/convert', async (req, res) => {
     const base64XLarge = await storeAsImage(1, true);
 
     console.log('done');
+    }
+    catch(err) {
+      console.log(err);
+    }
 
     const payload = {
       smallImage: base64Small.base64,
