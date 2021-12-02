@@ -8,6 +8,8 @@ import PDFParser from 'pdf2json';
 import util from 'util';
 import { opendir } from 'fs/promises';
 
+console.log('starting service');
+
 //const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
 const submitUrl = 'https://skatilsya.com/test/dwg/submit/submit.php';
 
@@ -446,7 +448,6 @@ app.get('/convert', async (req, res) => {
 
     console.log('generating base64Small...')
 
-    try {
     let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
     const base64Small = await storeAsImage(1, true);
 
@@ -459,9 +460,6 @@ app.get('/convert', async (req, res) => {
 
     storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
     const base64XLarge = await storeAsImage(1, true);
-    } catch (exc) {
-      console.log('conversion failed');
-    }
 
     console.log('done');
 
