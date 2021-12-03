@@ -104,6 +104,7 @@ function processSubmissionBody(body) {
   const submissionID = body.submissionID;
 
   if(inProcess.includes(submissionID)) {
+    console.log(`submission [${submissionID}] is already being processed. inProcess = ${inProcess}`);
     return;
   } else {
     inProcess.push(submissionID);
@@ -152,18 +153,31 @@ function processSubmissionBody(body) {
 
         console.log('generating base64Small...')
 
-        let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
-        const base64Small = await storeAsImage(1, true);
+        let base64Small, base64Large, base64XLarge;
 
-        console.log('generating base64Large...')
-
-        storeAsImage = fromPath(path, getLargeImageOptions(width, height));
-        const base64Large = await storeAsImage(1, true);
-
-        console.log('generating base64XLarge...')
-
-        storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
-        const base64XLarge = await storeAsImage(1, true);
+        try {
+          let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+          base64Small = await storeAsImage(1, true);
+    
+          console.log('generating base64Large...')
+    
+          storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+          base64Large = await storeAsImage(1, true);
+    
+          console.log('generating base64XLarge...')
+    
+          storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+          base64XLarge = await storeAsImage(1, true);
+    
+          console.log('done');
+        }
+        catch(err) {
+          console.log(err);
+          if(err.code === 'ENOMEM') {
+            console.log('not enough memory, restarting...');
+            process.exit(1);
+          }
+        }
 
         const payload = {
           smallImage: base64Small.base64,
@@ -305,128 +319,6 @@ app.get('/testsubmit', (req, res) => {
   processSubmissionBody(payload);
 });
 
-app.post('/submit2', multer().single(), async (req, res) => {
-
-  //console.log(req.body);
-
-  const formTitle = req.body.formTitle;
-  const submissionID = req.body.submissionID;
-  const rawRequest = JSON.parse(req.body.rawRequest);
-
-  const name = rawRequest.q1_yourName.first + ' ' + rawRequest.q1_yourName.last;
-  const posterid = rawRequest.q10_posterid;
-  const email = rawRequest.q2_yourEmail;
-  const abstract = rawRequest.q7_posterAbstract;
-  const title = rawRequest.q22_theTitle;
-  const authors = rawRequest.q23_thePoster;
-  const affiliates = rawRequest.q24_thePoster24;
-  const keywords = rawRequest.q5_keywords;
-
-  const narrationWavUrl = rawRequest.q20_addA ? "https\:\/\/jotform.com" + rawRequest.q20_addA : "";
-  const pdfUrl = rawRequest.uploadYour3[0];
-
-  try {
-
-    console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, name = ${name}`);
-
-    const path = process.cwd() + `/temp.pdf`;
-    console.log(path);
-
-    got.stream(pdfUrl)
-      .pipe(fs.createWriteStream(path))
-      .on('close', async () => {
-        console.log('File written!');
-
-        let pdfParser = new PDFParser();
-        pdfParser.loadPDF(path);
-        pdfParser.on("pdfParser_dataReady", async pdfData => {
-
-          const width = pdfData.Pages[0].Width; // pdf width
-          const height = pdfData.Pages[0].Height; // page height
-
-          console.log(`width = ${width}, height = ${height}`);
-
-          console.log(getSmallImageOptions(width, height));
-          console.log(getLargeImageOptions(width, height));
-          console.log(getXLargeImageOptions(width, height));
-
-          console.log('generating base64Small...')
-
-          let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
-          const base64Small = await storeAsImage(1, true);
-
-          console.log('generating base64Large...')
-
-          storeAsImage = fromPath(path, getLargeImageOptions(width, height));
-          const base64Large = await storeAsImage(1, true);
-
-          console.log('generating base64XLarge...')
-
-          storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
-          const base64XLarge = await storeAsImage(1, true);
-
-          const payload = {
-            smallImage: base64Small.base64,
-            largeImage: base64Large.base64,
-            xlargeImage: base64XLarge.base64,
-
-            posterid : posterid,
-            eventid : posterid.replace(/([A-Z]+)\d+/g, "$1"),
-            email : email,
-            abstract : abstract,
-            title : title,
-            authors : authors,
-            affiliates : affiliates,
-            keywords : keywords,
-          
-            narrationWavUrl : narrationWavUrl,
-            pdfUrl : pdfUrl,
-          };
-
-          console.log('writing last payload to file');
-
-          fs.writeFile("./last-payload.txt", JSON.stringify(payload), function(err) {
-            if (err) {
-                console.log(err);
-            }
-          });
-
-          let loop = true;
-          let timeout = 60 * 1000;
-          let started = new Date().getTime();
-
-          console.log(`submit to php loop`);
-
-          while(loop && ((new Date().getTime() - started) < timeout)) {
-
-            console.log(`sending to php... (now = ${new Date().getTime()}, started = ${started})`);
-
-            await got.post(submitUrl, { json: payload }).then(response => {
-              console.log(response.body);
-
-              if(response.body === 'ok') {
-                loop = false;
-                console.log('sent to php');
-              }
-            }).catch(error => {
-              console.log(`failed to send to php, error: ${error}`);
-            });
-
-            await sleep(2000);
-          }
-
-          if(loop) {
-            console.log(`timed out sending to php data of [${posterid}]`);
-          }          
-        });
-      });
-  } catch (exception) {
-    const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
-    console.log(errMessage);
-    res.status(401).send(`Error happened: ${exception.message}`);
-  }
-});
-
 app.get('/convert', async (req, res) => {
 
   //const path = `./assets/STPE20.pdf`;
@@ -448,7 +340,7 @@ app.get('/convert', async (req, res) => {
 
     console.log('generating base64Small...')
 
-    const base64Small, base64Large, base64XLarge;
+    let base64Small, base64Large, base64XLarge;
 
     try {
       let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
@@ -469,7 +361,8 @@ app.get('/convert', async (req, res) => {
     catch(err) {
       console.log(err);
       if(err.code === 'ENOMEM') {
-        //process.exit(1);
+        console.log('not enough memory, restarting...');
+        process.exit(1);
       }
     }
 
