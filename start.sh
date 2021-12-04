@@ -1,1 +1,1 @@
-pm2 start ./src/index.js --cron-restart="0 0 * * *" --max-memory-restart="300M"
+pm2 start ./src/index.js --name "pdf-export" --cron-restart="0 0 * * *" --max-memory-restart 300M  
