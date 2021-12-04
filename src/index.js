@@ -10,8 +10,8 @@ import { opendir } from 'fs/promises';
 
 console.log('starting service');
 
-//const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
-const submitUrl = 'https://skatilsya.com/test/dwg/submit/submit.php';
+const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
+//const submitUrl = 'https://skatilsya.com/test/dwg/submit/submit.php';
 
 const submissionsCacheFolder = './submissions-cache/';
 const submissionsHistoryFolder = './submissions-history/';
@@ -267,7 +267,7 @@ async function processCache() {
     for await (const dirent of dir) 
       if(dirent && dirent.name.match(/^(\d+)\.json$/g)) {
         
-        console.log(dirent.name);
+        //console.log(dirent.name);
 
         const json = JSON.parse(fs.readFileSync(submissionsCacheFolder + dirent.name));
 
@@ -280,7 +280,7 @@ async function processCache() {
   }
 }
 
-//setInterval(processCache, 3 * 1000);
+setInterval(processCache, 30 * 1000);
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
@@ -383,8 +383,8 @@ app.get('/convert', async (req, res) => {
     let started = new Date().getTime();
 
     console.log(`submit to php loop`);
-    //const submitUrl = 'https://www.posterpresentations.com/developer/submit/image.php';
-    const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
+    const submitUrl = 'https://www.posterpresentations.com/developer/submit/image.php';
+    //const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
 
     while(loop && ((new Date().getTime() - started) < timeout)) {
 
