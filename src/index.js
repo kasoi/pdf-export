@@ -7,20 +7,53 @@ import got from 'got';
 import PDFParser from 'pdf2json';
 import util from 'util';
 import { opendir } from 'fs/promises';
+import QR from 'qrcode';
 
 console.log('starting service');
-
-const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
-//const submitUrl = 'https://skatilsya.com/test/dwg/submit/submit.php';
 
 const submissionsCacheFolder = './submissions-cache/';
 const submissionsHistoryFolder = './submissions-history/';
 
+let inProcess = [];
+
+const app = express();
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
+app.post('/submitDev', multer().single(), processSubmissionToDev);
+app.post('/submitPublic', multer().single(), processSubmissionToPublic);
+
+app.listen(3020);
+
+function processSubmissionToPublic (req, res) {
+
+  const submitUrl = 'https://www.posterpresentations.com/research/submit.php';
+
+  processSubmission(req, res, submitUrl);
+}
+
+function processSubmissionToDev (req, res) {
+
+  const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
+
+  processSubmission(req, res, submitUrl);
+}
+
+function processSubmission(req, res, submitUrl) {
+
+  if(saveSubmissionToCache(req.body, submissionsCacheFolder)) {
+
+    res.status(200).send('ok');
+
+    processSubmissionBody(req.body, submitUrl);
+
+    return;
+  } 
+  res.status(401).send('not ok');
+}
+
 var logFile = fs.createWriteStream('logs.txt', { flags: 'a' });
 // Or 'w' to truncate the file every time the process starts.
 var logStdout = process.stdout;
-
-let inProcess = [];
 
 console.log = function () {
   logFile.write(timeNow() + ' | ' + util.format.apply(null, arguments) + '\n');
@@ -98,7 +131,7 @@ const saveSubmissionToCache = (body, folder) => {
   return res;
 };
 
-function processSubmissionBody(body) {
+function processSubmissionBody(body, submitUrl) {
 
   const formTitle = body.formTitle;
   const submissionID = body.submissionID;
@@ -153,7 +186,7 @@ function processSubmissionBody(body) {
 
         console.log('generating base64Small...')
 
-        let base64Small, base64Large, base64XLarge;
+        let base64Small, base64Large, base64XLarge, base64qrcode;
 
         try {
           let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
@@ -168,21 +201,28 @@ function processSubmissionBody(body) {
     
           storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
           base64XLarge = await storeAsImage(1, true);
+
+          console.log('generating base64qrcode...')
+
+          const posterUrl = `https://www.posterpresentations.com/research/groups/${eventid}/${posterid}/${posterid}.html`;
+          base64qrcode = (await QR.toDataURL(posterUrl)).replace('data:image/png;base64,', '');
     
           console.log('done');
         }
         catch(err) {
+          console.log('failed to generate images');
           console.log(err);
           if(err.code === 'ENOMEM') {
             console.log('not enough memory, restarting...');
-            process.exit(1);
           }
+          process.exit(1);
         }
 
         const payload = {
           smallImage: base64Small.base64,
           largeImage: base64Large.base64,
           xlargeImage: base64XLarge.base64,
+          base64qrcode : base64qrcode,
 
           posterid : posterid,
           eventid : posterid.replace(/([A-Z]+)\d+/g, "$1"),
@@ -271,7 +311,7 @@ async function processCache() {
 
         const json = JSON.parse(fs.readFileSync(submissionsCacheFolder + dirent.name));
 
-        processSubmissionBody(json);
+        processSubmissionToTest(json);
         sleep(2000);
       }
 
@@ -282,23 +322,6 @@ async function processCache() {
 
 setInterval(processCache, 30 * 1000);
 
-const app = express();
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-
-app.post('/submit', multer().single(), (req, res) => {
-
-  if(saveSubmissionToCache(req.body, submissionsCacheFolder)) {
-
-    res.status(200).send('ok');
-    processSubmissionBody(req.body);
-
-    return;
-  } 
-  res.status(401).send('not ok');
-});
-
-app.listen(3020);
-
 function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -307,17 +330,30 @@ function sleep(ms) {
 
 ////////////// test routes ////////////////////////////////
 
+app.get('/qr', async (req, res) => {
+
+  const url = 'https://www.posterpresentations.com/research/groups/TAFP/TAFP12/TAFP12.html';
+
+  try {
+    console.log((await QR.toDataURL(url)).replace('data:image/png;base64,', ''));
+  } catch (err) {
+    console.error(err)
+  }
+  res.status(200);//.send("server is running");
+});
+
 app.get('/', (req, res) => {
   res.status(200).send("server is running");
 });
 
-app.get('/testsubmit', (req, res) => {
+function processSubmissionToTest (req, res) {
 
-  let rawdata = fs.readFileSync('test-payload.txt');
-  let payload = JSON.parse(rawdata);
+  const submitUrl = 'https://skatilsya.com/test/dwg/submit/submit.php';
 
-  processSubmissionBody(payload);
-});
+  processSubmission(req, res, submitUrl);
+}
+
+app.get('/testsubmit', processSubmissionToTest);
 
 app.get('/convert', async (req, res) => {
 
