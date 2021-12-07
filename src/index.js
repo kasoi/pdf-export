@@ -149,6 +149,7 @@ function processSubmissionBody(body, submitUrl) {
 
     const name = rawRequest.q1_yourName.first + ' ' + rawRequest.q1_yourName.last;
     const posterid = rawRequest.q10_posterid;
+    const eventid = posterid.replace(/([A-Z]+)\d+/g, "$1");
     const email = rawRequest.q2_yourEmail;
     const abstract = rawRequest.q7_posterAbstract;
     const title = rawRequest.q22_theTitle;
@@ -225,7 +226,7 @@ function processSubmissionBody(body, submitUrl) {
           base64qrcode : base64qrcode,
 
           posterid : posterid,
-          eventid : posterid.replace(/([A-Z]+)\d+/g, "$1"),
+          eventid : eventid,
           email : email,
           abstract : abstract,
           title : title,
