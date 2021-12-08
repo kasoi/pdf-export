@@ -14,37 +14,47 @@ console.log('starting service');
 const submissionsCacheFolder = './submissions-cache/';
 const submissionsHistoryFolder = './submissions-history/';
 
+const ROUTE = Object.freeze({
+  DEV:   Symbol("Dev"),
+  PUBLIC:  Symbol("Public"),
+  TEST: Symbol("Test")
+});
+
+let routePHP = new Map();
+
+routePHP.set(ROUTE.DEV, 'https://www.posterpresentations.com/developer/submit/submit.php');
+routePHP.set(ROUTE.PUBLIC, 'https://www.posterpresentations.com/research/submit.php');
+routePHP.set(ROUTE.TEST, 'https://skatilsya.com/test/dwg/submit/submit.php');
+
+let routeFolder = new Map();
+
+routeFolder.set(ROUTE.DEV, 'dev/');
+routeFolder.set(ROUTE.PUBLIC, 'public/');
+routeFolder.set(ROUTE.TEST, 'test/');
+
+let routeAPI = new Map();
+
+routeAPI.set(ROUTE.DEV, '/submitDev');
+routeAPI.set(ROUTE.PUBLIC, '/submitPublic');
+routeAPI.set(ROUTE.TEST, '/submitTest');
+
 let inProcess = [];
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-app.post('/submitDev', multer().single(), processSubmissionToDev);
-app.post('/submitPublic', multer().single(), processSubmissionToPublic);
+app.post(routeAPI.get(ROUTE.DEV), multer().single(), (req, res) => processSubmission(req, res, ROUTE.DEV));
+app.post(routeAPI.get(ROUTE.PUBLIC), multer().single(), (req, res) => processSubmission(req, res, ROUTE.PUBLIC));
 
 app.listen(3020);
 
-function processSubmissionToPublic (req, res) {
+function processSubmission(req, res, route) {
 
-  const submitUrl = 'https://www.posterpresentations.com/research/submit.php';
-
-  processSubmission(req, res, submitUrl);
-}
-
-function processSubmissionToDev (req, res) {
-
-  const submitUrl = 'https://www.posterpresentations.com/developer/submit/submit.php';
-
-  processSubmission(req, res, submitUrl);
-}
-
-function processSubmission(req, res, submitUrl) {
-
-  if(saveSubmissionToCache(req.body, submissionsCacheFolder)) {
+  if(saveSubmissionToCache(req.body, route)) {
 
     res.status(200).send('ok');
 
-    processSubmissionBody(req.body, submitUrl);
+    processSubmissionBody(req.body, route);
 
     return;
   } 
@@ -114,10 +124,12 @@ const getImageOptions = (width, heigth, dpi) => {
   return options;
 };
 
-const saveSubmissionToCache = (body, folder) => {
+const saveSubmissionToCache = (body, route) => {
   let res = false;
 
   try {
+
+    const folder = submissionsCacheFolder + routeFolder.get(route);
 
     if(!fs.existsSync(folder)) {
       fs.mkdirSync(folder);
@@ -131,7 +143,7 @@ const saveSubmissionToCache = (body, folder) => {
   return res;
 };
 
-function processSubmissionBody(body, submitUrl) {
+function processSubmissionBody(body, route) {
 
   const formTitle = body.formTitle;
   const submissionID = body.submissionID;
@@ -254,16 +266,16 @@ function processSubmissionBody(body, submitUrl) {
 
         while(loop && ((new Date().getTime() - started) < timeout)) {
 
-          console.log(`sending to php... (now = ${new Date().getTime()}, started = ${started})`);
+          console.log(`sending to ${routePHP.get(route)} (now = ${new Date().getTime()}, started = ${started})`);
 
-          await got.post(submitUrl, { json: payload }).then(response => {
+          await got.post(routePHP.get(route), { json: payload }).then(response => {
             console.log(response.body);
 
             if(response.body === 'ok') {
               loop = false;
               console.log('sent to php');
 
-              moveSubmissionToHistory(submissionID, posterid);
+              moveSubmissionToHistory(submissionID, posterid, route);
               inProcess.splice(inProcess.indexOf(submissionID));
             }
           }).catch(error => {
@@ -284,14 +296,14 @@ function processSubmissionBody(body, submitUrl) {
   }
 }
 
-function moveSubmissionToHistory(submissionID, posterid) {
+function moveSubmissionToHistory(submissionID, posterid, route) {
   try {
 
     if(!fs.existsSync(submissionsHistoryFolder)) {
       fs.mkdirSync(submissionsHistoryFolder);
     }
 
-    fs.renameSync(submissionsCacheFolder + submissionID + '.json', submissionsHistoryFolder + posterid + '.json');
+    fs.renameSync(submissionsCacheFolder + routeFolder.get(route) + submissionID + '.json', submissionsHistoryFolder + posterid + '.json');
     console.log(`moved submission [${posterid}] to history`);
   } catch (exception) {
     const errMessage = `ERR: failed to move submission json (submissionID = ${submissionID}, posterid = ${posterid}), exception = ${exception.message}`;
@@ -303,19 +315,27 @@ async function processCache() {
 
   try {
 
-    const dir = await opendir(submissionsCacheFolder);
-    //const dir = await opendir("./");
-    for await (const dirent of dir) 
-      if(dirent && dirent.name.match(/^(\d+)\.json$/g)) {
-        
-        //console.log(dirent.name);
+    for (const [route, value] of routeFolder.entries()) {
 
-        const json = JSON.parse(fs.readFileSync(submissionsCacheFolder + dirent.name));
+      const folder = submissionsCacheFolder + value;
 
-        processSubmissionToTest(json);
-        sleep(2000);
+      if(!fs.existsSync(folder)) {
+        continue;
       }
 
+      const dir = await opendir(folder);
+
+      for await (const dirent of dir) 
+        if(dirent && dirent.name.match(/^(\d+)\.json$/g)) {
+          
+          //console.log(dirent.name);
+
+          const json = JSON.parse(fs.readFileSync(folder + dirent.name));
+
+          processSubmissionBody(json, route);
+          sleep(2000);
+        }
+    }
   } catch (err) {
     console.log(`ERR: processCache, exception = ${err.message}`);
   }
@@ -347,14 +367,7 @@ app.get('/', (req, res) => {
   res.status(200).send("server is running");
 });
 
-function processSubmissionToTest (req, res) {
-
-  const submitUrl = 'https://skatilsya.com/test/dwg/submit/submit.php';
-
-  processSubmission(req, res, submitUrl);
-}
-
-app.get('/testsubmit', processSubmissionToTest);
+app.post(routeAPI.get(ROUTE.TEST), multer().single(), (req, res) => processSubmission(req, res, ROUTE.TEST));
 
 app.get('/convert', async (req, res) => {
 
