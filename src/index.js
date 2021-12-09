@@ -161,7 +161,7 @@ function processSubmissionBody(body, route) {
 
     const name = rawRequest.q1_yourName.first + ' ' + rawRequest.q1_yourName.last;
     const posterid = rawRequest.q10_posterid;
-    const eventid = posterid.replace(/([A-Z]+)\d+/g, "$1");
+    const eventid = posterid.replace(/([A-Za-z]+)\d+/g, "$1");
     const email = rawRequest.q2_yourEmail;
     const abstract = rawRequest.q7_posterAbstract;
     const title = rawRequest.q22_theTitle;
