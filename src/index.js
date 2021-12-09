@@ -168,6 +168,7 @@ function processSubmissionBody(body, route) {
     const authors = rawRequest.q23_thePoster;
     const affiliates = rawRequest.q24_thePoster24;
     const keywords = rawRequest.q5_keywords;
+    const template = rawRequest.q32_templateName ? rawRequest.q32_templateName : 'default';
 
     const narrationWavUrl = rawRequest.q20_addA ? "https\:\/\/jotform.com" + rawRequest.q20_addA : "";
     const pdfUrl = rawRequest.uploadYour3[0];
@@ -237,6 +238,7 @@ function processSubmissionBody(body, route) {
           xlargeImage: base64XLarge.base64,
           base64qrcode : base64qrcode,
 
+          template : template,
           posterid : posterid,
           eventid : eventid,
           email : email,
@@ -275,7 +277,7 @@ function processSubmissionBody(body, route) {
               loop = false;
               console.log('sent to php');
 
-              moveSubmissionToHistory(submissionID, posterid, route);
+              moveSubmissionToHistory(submissionID, eventid, posterid, route);
               inProcess.splice(inProcess.indexOf(submissionID));
             }
           }).catch(error => {
@@ -296,14 +298,14 @@ function processSubmissionBody(body, route) {
   }
 }
 
-function moveSubmissionToHistory(submissionID, posterid, route) {
+function moveSubmissionToHistory(submissionID, eventid, posterid, route) {
   try {
 
     if(!fs.existsSync(submissionsHistoryFolder)) {
       fs.mkdirSync(submissionsHistoryFolder);
     }
 
-    fs.renameSync(submissionsCacheFolder + routeFolder.get(route) + submissionID + '.json', submissionsHistoryFolder + posterid + '.json');
+    fs.renameSync(submissionsCacheFolder + routeFolder.get(route) + submissionID + '.json', submissionsHistoryFolder + eventid + '/' + posterid + '.json');
     console.log(`moved submission [${posterid}] to history`);
   } catch (exception) {
     const errMessage = `ERR: failed to move submission json (submissionID = ${submissionID}, posterid = ${posterid}), exception = ${exception.message}`;
