@@ -301,11 +301,13 @@ function processSubmissionBody(body, route) {
 function moveSubmissionToHistory(submissionID, eventid, posterid, route) {
   try {
 
-    if(!fs.existsSync(submissionsHistoryFolder)) {
-      fs.mkdirSync(submissionsHistoryFolder);
+    const folder = submissionsHistoryFolder + eventid + '/';
+
+    if(!fs.existsSync(folder)) {
+      fs.mkdirSync(folder);
     }
 
-    fs.renameSync(submissionsCacheFolder + routeFolder.get(route) + submissionID + '.json', submissionsHistoryFolder + eventid + '/' + posterid + '.json');
+    fs.renameSync(submissionsCacheFolder + routeFolder.get(route) + submissionID + '.json', folder + posterid + '.json');
     console.log(`moved submission [${posterid}] to history`);
   } catch (exception) {
     const errMessage = `ERR: failed to move submission json (submissionID = ${submissionID}, posterid = ${posterid}), exception = ${exception.message}`;
