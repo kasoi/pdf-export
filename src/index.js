@@ -304,7 +304,7 @@ function moveSubmissionToHistory(submissionID, eventid, posterid, route) {
     const folder = submissionsHistoryFolder + eventid + '/';
 
     if(!fs.existsSync(folder)) {
-      fs.mkdirSync(folder);
+      fs.mkdirSync(folder, { recursive: true });
     }
 
     fs.renameSync(submissionsCacheFolder + routeFolder.get(route) + submissionID + '.json', folder + posterid + '.json');
