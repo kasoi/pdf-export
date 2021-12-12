@@ -14,47 +14,22 @@ console.log('starting service');
 const submissionsCacheFolder = './submissions-cache/';
 const submissionsHistoryFolder = './submissions-history/';
 
-const ROUTE = Object.freeze({
-  DEV:   Symbol("Dev"),
-  PUBLIC:  Symbol("Public"),
-  TEST: Symbol("Test")
-});
-
-let routePHP = new Map();
-
-routePHP.set(ROUTE.DEV, 'https://www.posterpresentations.com/developer/submit/submit.php');
-routePHP.set(ROUTE.PUBLIC, 'https://www.posterpresentations.com/research/submit.php');
-routePHP.set(ROUTE.TEST, 'https://skatilsya.com/test/dwg/submit/submit.php');
-
-let routeFolder = new Map();
-
-routeFolder.set(ROUTE.DEV, 'dev/');
-routeFolder.set(ROUTE.PUBLIC, 'public/');
-routeFolder.set(ROUTE.TEST, 'test/');
-
-let routeAPI = new Map();
-
-routeAPI.set(ROUTE.DEV, '/submitDev');
-routeAPI.set(ROUTE.PUBLIC, '/submitPublic');
-routeAPI.set(ROUTE.TEST, '/submitTest');
-
 let inProcess = [];
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-app.post(routeAPI.get(ROUTE.DEV), multer().single(), (req, res) => processSubmission(req, res, ROUTE.DEV));
-app.post(routeAPI.get(ROUTE.PUBLIC), multer().single(), (req, res) => processSubmission(req, res, ROUTE.PUBLIC));
+app.post('/submit', multer().single(), (req, res) => processSubmission(req, res));
 
 app.listen(3020);
 
-function processSubmission(req, res, route) {
+function processSubmission(req, res) {
 
-  if(saveSubmissionToCache(req.body, route)) {
+  if(saveSubmissionToCache(req.body)) {
 
     res.status(200).send('ok');
 
-    processSubmissionBody(req.body, route);
+    processSubmissionBody(req.body);
 
     return;
   } 
@@ -124,12 +99,12 @@ const getImageOptions = (width, heigth, dpi) => {
   return options;
 };
 
-const saveSubmissionToCache = (body, route) => {
+const saveSubmissionToCache = (body) => {
   let res = false;
 
   try {
 
-    const folder = submissionsCacheFolder + routeFolder.get(route);
+    const folder = submissionsCacheFolder;
 
     if(!fs.existsSync(folder)) {
       fs.mkdirSync(folder);
@@ -143,7 +118,36 @@ const saveSubmissionToCache = (body, route) => {
   return res;
 };
 
-function processSubmissionBody(body, route) {
+function getRawRequestField(rawRequest, propName, required, defaultValue = '') {
+
+  for (const property in rawRequest) {
+
+    const pattern = new RegExp("^q\\d+_" + propName + "$");
+
+    if(property.match(pattern)) {
+
+      if(rawRequest[property]) {
+
+        return rawRequest[property];
+      } else {
+
+        if(required && !defaultValue) {
+          throw new Error(`rawRequest property [${property}] is required and empty`);
+        }
+        
+        return defaultValue;
+      }
+    }
+  }
+
+  if(required && !defaultValue) {
+    throw new Error(`rawRequest has no property [${propName}]`);
+  }
+
+  return defaultValue;
+}
+
+function processSubmissionBody(body) {
 
   const formTitle = body.formTitle;
   const submissionID = body.submissionID;
@@ -159,21 +163,25 @@ function processSubmissionBody(body, route) {
 
   try {
 
-    const name = rawRequest.q1_yourName.first + ' ' + rawRequest.q1_yourName.last;
-    const posterid = rawRequest.q10_posterid;
+    const posterid = getRawRequestField(rawRequest, 'posterid', true);
     const eventid = posterid.replace(/([A-Za-z]+)\d+/g, "$1");
-    const email = rawRequest.q2_yourEmail;
-    const abstract = rawRequest.q7_posterAbstract;
-    const title = rawRequest.q22_theTitle;
-    const authors = rawRequest.q23_thePoster;
-    const affiliates = rawRequest.q24_thePoster24;
-    const keywords = rawRequest.q5_keywords;
-    const template = rawRequest.q32_templateName ? rawRequest.q32_templateName : 'default';
+    const email = getRawRequestField(rawRequest, 'yourEmail', true);
+    const abstract = getRawRequestField(rawRequest, 'posterAbstract', true);
+    const title = getRawRequestField(rawRequest, 'theTitle', true);
+    const authors = getRawRequestField(rawRequest, 'thePoster', true);
+    const affiliates = getRawRequestField(rawRequest, 'thePoster24', true);
+    const keywords = getRawRequestField(rawRequest, 'keywords', false);
+    const template = getRawRequestField(rawRequest, 'templateName', true, 'default');
+    const endpoint = getRawRequestField(rawRequest, 'endpoint', true);
+    const folder = getRawRequestField(rawRequest, 'folderName', true, 'review');
+    const generateQR = getRawRequestField(rawRequest, 'generateQrcode', true, false);
 
-    const narrationWavUrl = rawRequest.q20_addA ? "https\:\/\/jotform.com" + rawRequest.q20_addA : "";
+    let narrationWavUrl = getRawRequestField(rawRequest, 'addA', false);
+    narrationWavUrl = narrationWavUrl ? "https\:\/\/jotform.com" + narrationWavUrl : narrationWavUrl;
+
     const pdfUrl = rawRequest.uploadYour3[0];
 
-    console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, name = ${name}`);
+    console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, posterid = ${posterid}`);
 
     const path = process.cwd() + `/temp.pdf`;
 
@@ -200,7 +208,7 @@ function processSubmissionBody(body, route) {
 
         console.log('generating base64Small...')
 
-        let base64Small, base64Large, base64XLarge, base64qrcode;
+        let base64Small, base64Large, base64XLarge, base64qrcode = "";
 
         try {
           let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
@@ -218,8 +226,10 @@ function processSubmissionBody(body, route) {
 
           console.log('generating base64qrcode...')
 
-          const posterUrl = `https://www.posterpresentations.com/research/groups/${eventid}/${posterid}/${posterid}.html`;
-          base64qrcode = (await QR.toDataURL(posterUrl)).replace('data:image/png;base64,', '');
+          if(generateQR) {
+            const posterUrl = endpoint.replace('submit.php', '') + `${folder}/${eventid}/${posterid}/${posterid}.html`;
+            base64qrcode = (await QR.toDataURL(posterUrl)).replace('data:image/png;base64,', '');
+          }
     
           console.log('done');
         }
@@ -239,6 +249,7 @@ function processSubmissionBody(body, route) {
           base64qrcode : base64qrcode,
 
           template : template,
+          folder : folder,
           posterid : posterid,
           eventid : eventid,
           email : email,
@@ -268,16 +279,16 @@ function processSubmissionBody(body, route) {
 
         while(loop && ((new Date().getTime() - started) < timeout)) {
 
-          console.log(`sending to ${routePHP.get(route)} (now = ${new Date().getTime()}, started = ${started})`);
+          console.log(`sending to ${endpoint} (now = ${new Date().getTime()}, started = ${started})`);
 
-          await got.post(routePHP.get(route), { json: payload }).then(response => {
+          await got.post(endpoint, { json: payload }).then(response => {
             console.log(response.body);
 
             if(response.body === 'ok') {
               loop = false;
               console.log('sent to php');
 
-              moveSubmissionToHistory(submissionID, eventid, posterid, route);
+              moveSubmissionToHistory(submissionID, eventid, posterid);
               inProcess.splice(inProcess.indexOf(submissionID));
             }
           }).catch(error => {
@@ -294,11 +305,12 @@ function processSubmissionBody(body, route) {
     });
   } catch (exception) {
     const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
+    inProcess.splice(inProcess.indexOf(submissionID));
     console.log(errMessage);
   }
 }
 
-function moveSubmissionToHistory(submissionID, eventid, posterid, route) {
+function moveSubmissionToHistory(submissionID, eventid, posterid) {
   try {
 
     const folder = submissionsHistoryFolder + eventid + '/';
@@ -319,27 +331,24 @@ async function processCache() {
 
   try {
 
-    for (const [route, value] of routeFolder.entries()) {
+    const folder = submissionsCacheFolder;
 
-      const folder = submissionsCacheFolder + value;
-
-      if(!fs.existsSync(folder)) {
-        continue;
-      }
-
-      const dir = await opendir(folder);
-
-      for await (const dirent of dir) 
-        if(dirent && dirent.name.match(/^(\d+)\.json$/g)) {
-          
-          //console.log(dirent.name);
-
-          const json = JSON.parse(fs.readFileSync(folder + dirent.name));
-
-          processSubmissionBody(json, route);
-          sleep(2000);
-        }
+    if(!fs.existsSync(folder)) {
+      return;
     }
+
+    const dir = await opendir(folder);
+
+    for await (const dirent of dir) 
+      if(dirent && dirent.name.match(/^(\d+)\.json$/g)) {
+        
+        //console.log(dirent.name);
+
+        const json = JSON.parse(fs.readFileSync(folder + dirent.name));
+
+        processSubmissionBody(json);
+        sleep(2000);
+      }
   } catch (err) {
     console.log(`ERR: processCache, exception = ${err.message}`);
   }
@@ -370,8 +379,6 @@ app.get('/qr', async (req, res) => {
 app.get('/', (req, res) => {
   res.status(200).send("server is running");
 });
-
-app.post(routeAPI.get(ROUTE.TEST), multer().single(), (req, res) => processSubmission(req, res, ROUTE.TEST));
 
 app.get('/convert', async (req, res) => {
 
