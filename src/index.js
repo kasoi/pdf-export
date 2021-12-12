@@ -319,7 +319,7 @@ function moveSubmissionToHistory(submissionID, eventid, posterid) {
       fs.mkdirSync(folder, { recursive: true });
     }
 
-    fs.renameSync(submissionsCacheFolder + routeFolder.get(route) + submissionID + '.json', folder + posterid + '.json');
+    fs.renameSync(submissionsCacheFolder + submissionID + '.json', folder + posterid + '.json');
     console.log(`moved submission [${posterid}] to history`);
   } catch (exception) {
     const errMessage = `ERR: failed to move submission json (submissionID = ${submissionID}, posterid = ${posterid}), exception = ${exception.message}`;
