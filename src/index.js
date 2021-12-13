@@ -300,6 +300,7 @@ function processSubmissionBody(body) {
 
         if(loop) {
           console.log(`timed out sending to php data of [${posterid}]`);
+          inProcess.splice(inProcess.indexOf(submissionID));
         }        
       });
     });
