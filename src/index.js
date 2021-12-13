@@ -164,7 +164,6 @@ function processSubmissionBody(body) {
   try {
 
     const posterid = getRawRequestField(rawRequest, 'posterid', true);
-    const eventid = posterid.replace(/([A-Za-z]+)\d+/g, "$1");
     const email = getRawRequestField(rawRequest, 'yourEmail', true);
     const abstract = getRawRequestField(rawRequest, 'posterAbstract', true);
     const title = getRawRequestField(rawRequest, 'theTitle', true);
@@ -175,6 +174,8 @@ function processSubmissionBody(body) {
     const endpoint = getRawRequestField(rawRequest, 'endpoint', true);
     const folder = getRawRequestField(rawRequest, 'folderName', true, 'review');
     const generateQR = getRawRequestField(rawRequest, 'generateQrcode', true, false);
+    const useGroupName = getRawRequestField(rawRequest, 'useGroupName', true, false);
+    const eventid = useGroupName ? posterid.replace(/([A-Za-z]+)\d+/g, "$1") : '';
 
     let narrationWavUrl = getRawRequestField(rawRequest, 'addA', false);
     narrationWavUrl = narrationWavUrl ? "https\:\/\/jotform.com" + narrationWavUrl : narrationWavUrl;
