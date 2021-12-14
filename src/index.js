@@ -173,9 +173,9 @@ function processSubmissionBody(body) {
     const template = getRawRequestField(rawRequest, 'templateName', true, 'default');
     const endpoint = getRawRequestField(rawRequest, 'endpoint', true);
     const folder = getRawRequestField(rawRequest, 'folderName', true, 'review');
-    const generateQR = getRawRequestField(rawRequest, 'generateQrcode', false, false);
-    const generateImages = getRawRequestField(rawRequest, 'generateImages', false, true);
-    const useGroupName = getRawRequestField(rawRequest, 'useGroupName', false, false);
+    const generateQR = getRawRequestField(rawRequest, 'generateQrcode', false, '0') === '0' ? false : true;
+    const generateImages = getRawRequestField(rawRequest, 'generateImages', false, '0') === '0' ? false : true;
+    const useGroupName = getRawRequestField(rawRequest, 'useGroupName', false, '0') === '0' ? false : true;
     const eventid = useGroupName ? posterid.replace(/([A-Za-z]+)\d+/g, "$1") : '';
 
     let narrationWavUrl = getRawRequestField(rawRequest, 'addA', false);
@@ -228,20 +228,6 @@ function processSubmissionBody(body) {
       
             storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
             base64XLarge = await storeAsImage(1, true);
-
-            console.log('generating base64qrcode...')
-
-            if(generateQR) {
-
-              let posterUrl = endpoint.replace('submit.php', '') + `${folder}/`;
-              
-              if(useGroupName) {
-                posterUrl += `${eventid}/`;
-              }
-
-              posterUrl += `${posterid}/${posterid}.html`;
-              base64qrcode = (await QR.toDataURL(posterUrl)).replace('data:image/png;base64,', '');
-            }
       
             console.log('done');
           }
@@ -253,6 +239,20 @@ function processSubmissionBody(body) {
             }
             process.exit(1);
           }
+        }
+
+        if(generateQR) {
+
+          console.log('generating base64qrcode...')
+
+          let posterUrl = endpoint.replace('submit.php', '') + `${folder}/`;
+          
+          if(useGroupName) {
+            posterUrl += `${eventid}/`;
+          }
+
+          posterUrl += `${posterid}/${posterid}.html`;
+          base64qrcode = (await QR.toDataURL(posterUrl)).replace('data:image/png;base64,', '');
         }
 
         const payload = {
