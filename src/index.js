@@ -173,8 +173,8 @@ function processSubmissionBody(body) {
     const template = getRawRequestField(rawRequest, 'templateName', true, 'default');
     const endpoint = getRawRequestField(rawRequest, 'endpoint', true);
     const folder = getRawRequestField(rawRequest, 'folderName', true, 'review');
-    const generateQR = getRawRequestField(rawRequest, 'generateQrcode', true, false);
-    const useGroupName = getRawRequestField(rawRequest, 'useGroupName', true, false);
+    const generateQR = getRawRequestField(rawRequest, 'generateQrcode', false, false);
+    const useGroupName = getRawRequestField(rawRequest, 'useGroupName', false, false);
     const eventid = useGroupName ? posterid.replace(/([A-Za-z]+)\d+/g, "$1") : '';
 
     let narrationWavUrl = getRawRequestField(rawRequest, 'addA', false);
