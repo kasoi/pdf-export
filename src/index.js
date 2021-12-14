@@ -174,6 +174,7 @@ function processSubmissionBody(body) {
     const endpoint = getRawRequestField(rawRequest, 'endpoint', true);
     const folder = getRawRequestField(rawRequest, 'folderName', true, 'review');
     const generateQR = getRawRequestField(rawRequest, 'generateQrcode', false, false);
+    const generateImages = getRawRequestField(rawRequest, 'generateImages', false, true);
     const useGroupName = getRawRequestField(rawRequest, 'useGroupName', false, false);
     const eventid = useGroupName ? posterid.replace(/([A-Za-z]+)\d+/g, "$1") : '';
 
@@ -203,44 +204,55 @@ function processSubmissionBody(body) {
 
         console.log(`width = ${width}, height = ${height}`);
 
-        console.log(getSmallImageOptions(width, height));
-        console.log(getLargeImageOptions(width, height));
-        console.log(getXLargeImageOptions(width, height));
-
-        console.log('generating base64Small...')
-
         let base64Small, base64Large, base64XLarge, base64qrcode = "";
 
-        try {
-          let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
-          base64Small = await storeAsImage(1, true);
-    
-          console.log('generating base64Large...')
-    
-          storeAsImage = fromPath(path, getLargeImageOptions(width, height));
-          base64Large = await storeAsImage(1, true);
-    
-          console.log('generating base64XLarge...')
-    
-          storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
-          base64XLarge = await storeAsImage(1, true);
+        if(generateImages) {
 
-          console.log('generating base64qrcode...')
+          try {
 
-          if(generateQR) {
-            const posterUrl = endpoint.replace('submit.php', '') + `${folder}/${eventid}/${posterid}/${posterid}.html`;
-            base64qrcode = (await QR.toDataURL(posterUrl)).replace('data:image/png;base64,', '');
-          }
+            console.log(getSmallImageOptions(width, height));
+            console.log(getLargeImageOptions(width, height));
+            console.log(getXLargeImageOptions(width, height));
     
-          console.log('done');
-        }
-        catch(err) {
-          console.log('failed to generate images');
-          console.log(err);
-          if(err.code === 'ENOMEM') {
-            console.log('not enough memory, restarting...');
+            console.log('generating base64Small...')
+
+            let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+            base64Small = await storeAsImage(1, true);
+    
+            console.log('generating base64Large...')
+      
+            storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+            base64Large = await storeAsImage(1, true);
+      
+            console.log('generating base64XLarge...')
+      
+            storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+            base64XLarge = await storeAsImage(1, true);
+
+            console.log('generating base64qrcode...')
+
+            if(generateQR) {
+
+              let posterUrl = endpoint.replace('submit.php', '') + `${folder}/`;
+              
+              if(useGroupName) {
+                posterUrl += `${eventid}/`;
+              }
+
+              posterUrl += `${posterid}/${posterid}.html`;
+              base64qrcode = (await QR.toDataURL(posterUrl)).replace('data:image/png;base64,', '');
+            }
+      
+            console.log('done');
           }
-          process.exit(1);
+          catch(err) {
+            console.log('failed to generate images');
+            console.log(err);
+            if(err.code === 'ENOMEM') {
+              console.log('not enough memory, restarting...');
+            }
+            process.exit(1);
+          }
         }
 
         const payload = {
