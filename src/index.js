@@ -256,9 +256,9 @@ function processSubmissionBody(body) {
         }
 
         const payload = {
-          smallImage: base64Small.base64,
-          largeImage: base64Large.base64,
-          xlargeImage: base64XLarge.base64,
+          smallImage: base64Small ? base64Small.base64 : '',
+          largeImage: base64Large ? base64Large.base64 : '',
+          xlargeImage: base64XLarge ? base64XLarge.base64 : '',
           base64qrcode : base64qrcode,
 
           template : template,
