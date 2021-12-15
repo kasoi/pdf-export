@@ -252,7 +252,7 @@ function processSubmissionBody(body) {
           }
 
           posterUrl += `${posterid}/${posterid}.html`;
-          base64qrcode = (await QR.toDataURL(posterUrl)).replace('data:image/png;base64,', '');
+          base64qrcode = (await QR.toDataURL(posterUrl, { scale: 8 })).replace('data:image/png;base64,', '');
         }
 
         const payload = {
