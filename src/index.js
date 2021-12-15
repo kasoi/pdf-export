@@ -132,7 +132,7 @@ function getRawRequestField(rawRequest, propName, required, defaultValue = '') {
       } else {
 
         if(required && !defaultValue) {
-          throw new Error(`rawRequest property [${property}] is required and empty`);
+          throw new Error(`rawRequest property [${propName}] is required and empty`);
         }
         
         return defaultValue;
@@ -174,7 +174,7 @@ function processSubmissionBody(body) {
     const endpoint = getRawRequestField(rawRequest, 'endpoint', true);
     const folder = getRawRequestField(rawRequest, 'folderName', true, 'review');
     const generateQR = getRawRequestField(rawRequest, 'generateQrcode', false, '0') === '0' ? false : true;
-    const generateImages = getRawRequestField(rawRequest, 'generateImages', false, '0') === '0' ? false : true;
+    const generateImages = getRawRequestField(rawRequest, 'generateImages', false, '1') === '0' ? false : true;
     const useGroupName = getRawRequestField(rawRequest, 'useGroupName', false, '0') === '0' ? false : true;
     const eventid = useGroupName ? posterid.replace(/([A-Za-z]+)\d+/g, "$1") : '';
 
