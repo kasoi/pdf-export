@@ -61,14 +61,14 @@ const timeNow = () => {
 const getSmallImageOptions = (width, height) => {
   const ratio = width / height;
   const maxSize = 800;
-  const dpi = maxSize / (width / 4.5);
+  const dpi = maxSize / width;
   return getImageOptions(maxSize, maxSize / ratio, dpi);
 };
 
 const getLargeImageOptions = (width, height) => {
   const ratio = width / height;
   const maxSize = 2160;
-  const dpi = maxSize / (width / 4.5);
+  const dpi = maxSize / width;
   
   if(width > height)
     return getImageOptions(maxSize, maxSize / ratio, dpi);
@@ -79,7 +79,7 @@ const getLargeImageOptions = (width, height) => {
 const getXLargeImageOptions = (width, height) => {
   const ratio = width / height;
   const maxSize = 2700;
-  const dpi = maxSize / (width / 4.5);
+  const dpi = maxSize / width;
 
   if(width > height)
     return getImageOptions(maxSize, maxSize / ratio, dpi);
