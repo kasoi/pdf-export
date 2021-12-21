@@ -176,6 +176,7 @@ function processSubmissionBody(body) {
     const generateQR = getRawRequestField(rawRequest, 'generateQrcode', false, '0') === '0' ? false : true;
     const generateImages = getRawRequestField(rawRequest, 'generateImages', false, '1') === '0' ? false : true;
     const useGroupName = getRawRequestField(rawRequest, 'useGroupName', false, '0') === '0' ? false : true;
+    const adminPassword = getRawRequestField(rawRequest, 'adminPassword', false);
     const eventid = useGroupName ? posterid.replace(/([A-Za-z]+)\d+/g, "$1") : '';
 
     let narrationWavUrl = getRawRequestField(rawRequest, 'addA', false);
@@ -280,6 +281,7 @@ function processSubmissionBody(body) {
         authors : authors,
         affiliates : affiliates,
         keywords : keywords,
+        adminPassword : adminPassword,
       
         narrationWavUrl : narrationWavUrl,
         pdfUrl : pdfUrl,
