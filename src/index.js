@@ -147,6 +147,19 @@ function getRawRequestField(rawRequest, propName, required, defaultValue = '') {
   return defaultValue;
 }
 
+function getPosterURL(endpoint, folder, useGroupName, eventid, posterid) {
+
+  let posterUrl = endpoint.replace('submit.php', '') + `${folder}/`;
+        
+  if(useGroupName) {
+    posterUrl += `${eventid}/`;
+  }
+
+  posterUrl += `${posterid}/`;
+
+  return posterUrl;
+}
+
 function processSubmissionBody(body) {
 
   const formTitle = body.formTitle;
@@ -251,17 +264,12 @@ function processSubmissionBody(body) {
         }
       }
 
+      const posterUrl = getPosterURL(endpoint, folder, useGroupName, eventid, posterid);
+
       if(generateQR) {
 
         console.log('generating base64qrcode...')
 
-        let posterUrl = endpoint.replace('submit.php', '') + `${folder}/`;
-        
-        if(useGroupName) {
-          posterUrl += `${eventid}/`;
-        }
-
-        posterUrl += `${posterid}/${posterid}.html`;
         base64qrcode = (await QR.toDataURL(posterUrl, { scale: 8 })).replace('data:image/png;base64,', '');
       }
 
@@ -282,6 +290,7 @@ function processSubmissionBody(body) {
         affiliates : affiliates,
         keywords : keywords,
         adminPassword : adminPassword,
+        posterUrl : posterUrl,
       
         narrationWavUrl : narrationWavUrl,
         pdfUrl : pdfUrl,
