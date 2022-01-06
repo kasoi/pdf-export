@@ -25,14 +25,14 @@ app.listen(3020);
 
 function processSubmission(req, res) {
 
-  if(saveSubmissionToCache(req.body)) {
+  if (saveSubmissionToCache(req.body)) {
 
     res.status(200).send('ok');
 
     processSubmissionBody(req.body);
 
     return;
-  } 
+  }
   res.status(401).send('not ok');
 }
 
@@ -69,8 +69,8 @@ const getLargeImageOptions = (width, height) => {
   const ratio = width / height;
   const maxSize = 2160;
   const dpi = maxSize / width;
-  
-  if(width > height)
+
+  if (width > height)
     return getImageOptions(maxSize, maxSize / ratio, dpi);
   else
     return getImageOptions(maxSize * ratio, maxSize, dpi);
@@ -81,7 +81,7 @@ const getXLargeImageOptions = (width, height) => {
   const maxSize = 2700;
   const dpi = maxSize / width;
 
-  if(width > height)
+  if (width > height)
     return getImageOptions(maxSize, maxSize / ratio, dpi);
   else
     return getImageOptions(maxSize * ratio, maxSize, dpi);
@@ -106,7 +106,7 @@ const saveSubmissionToCache = (body) => {
 
     const folder = submissionsCacheFolder;
 
-    if(!fs.existsSync(folder)) {
+    if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder);
     }
     fs.writeFileSync(folder + `${body.submissionID}.json`, JSON.stringify(body));
@@ -124,23 +124,23 @@ function getRawRequestField(rawRequest, propName, required, defaultValue = '') {
 
     const pattern = new RegExp("^q\\d+_" + propName + "$");
 
-    if(property.match(pattern)) {
+    if (property.match(pattern)) {
 
-      if(rawRequest[property]) {
+      if (rawRequest[property]) {
 
         return rawRequest[property];
       } else {
 
-        if(required && !defaultValue) {
+        if (required && !defaultValue) {
           throw new Error(`rawRequest property [${propName}] is required and empty`);
         }
-        
+
         return defaultValue;
       }
     }
   }
 
-  if(required && !defaultValue) {
+  if (required && !defaultValue) {
     throw new Error(`rawRequest has no property [${propName}]`);
   }
 
@@ -150,8 +150,8 @@ function getRawRequestField(rawRequest, propName, required, defaultValue = '') {
 function getPosterURL(endpoint, folder, useGroupName, eventid, posterid) {
 
   let posterUrl = endpoint.replace('submit.php', '') + `${folder}/`;
-        
-  if(useGroupName) {
+
+  if (useGroupName) {
     posterUrl += `${eventid}/`;
   }
 
@@ -165,7 +165,7 @@ function processSubmissionBody(body) {
   const formTitle = body.formTitle;
   const submissionID = body.submissionID;
 
-  if(inProcess.includes(submissionID)) {
+  if (inProcess.includes(submissionID)) {
     console.log(`submission [${submissionID}] is already being processed. inProcess = ${inProcess}`);
     return;
   } else {
@@ -190,7 +190,7 @@ function processSubmissionBody(body) {
     const generateImages = getRawRequestField(rawRequest, 'generateImages', false, '1') === '0' ? false : true;
     const useGroupName = getRawRequestField(rawRequest, 'useGroupName', false, '0') === '0' ? false : true;
     const adminPassword = getRawRequestField(rawRequest, 'adminPassword', false);
-    const eventid = useGroupName ? posterid.replace(/([A-Za-z]+)\d+/g, "$1") : '';
+    const eventid = useGroupName ? posterid.replace(/([A-Za-z]+).*[0-9]+/g, "$1") : '';
 
     let narrationWavUrl = getRawRequestField(rawRequest, 'addA', false);
     narrationWavUrl = narrationWavUrl ? "https\:\/\/jotform.com" + narrationWavUrl : narrationWavUrl;
@@ -205,137 +205,137 @@ function processSubmissionBody(body) {
 
 
     got.stream(pdfUrl)
-    .pipe(fs.createWriteStream(path))
-    .on('close', async () => {
-      console.log('pdf was downloaded and written to a local file');
+      .pipe(fs.createWriteStream(path))
+      .on('close', async () => {
+        console.log('pdf was downloaded and written to a local file');
 
-      let base64Small, base64Large, base64XLarge, base64qrcode = "";
+        let base64Small, base64Large, base64XLarge, base64qrcode = "";
 
-      if(generateImages) {
+        if (generateImages) {
 
-        try {
+          try {
 
-          const existingPdfBytes = fs.readFileSync(path);
+            const existingPdfBytes = fs.readFileSync(path);
 
-          // Load a PDFDocument without updating its existing metadata
-          const pdfDoc = await PDFDocument.load(existingPdfBytes, {
-            updateMetadata: false
-          })
+            // Load a PDFDocument without updating its existing metadata
+            const pdfDoc = await PDFDocument.load(existingPdfBytes, {
+              updateMetadata: false
+            })
 
-          if(pdfDoc.getPageCount() < 0) 
-            throw new Error(`pdf file has no pages`);
+            if (pdfDoc.getPageCount() < 0)
+              throw new Error(`pdf file has no pages`);
 
-          const page = pdfDoc.getPage(0);
+            const page = pdfDoc.getPage(0);
 
-          const width = page.getWidth() / 72; // pdf width in inches
-          const height = page.getHeight() / 72; // page height in inches
+            const width = page.getWidth() / 72; // pdf width in inches
+            const height = page.getHeight() / 72; // page height in inches
 
 
-          console.log(`width = ${width}, height = ${height}`);
+            console.log(`width = ${width}, height = ${height}`);
 
-          console.log(getSmallImageOptions(width, height));
-          console.log(getLargeImageOptions(width, height));
-          console.log(getXLargeImageOptions(width, height));
-  
-          console.log('generating base64Small...')
+            console.log(getSmallImageOptions(width, height));
+            console.log(getLargeImageOptions(width, height));
+            console.log(getXLargeImageOptions(width, height));
 
-          let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
-          base64Small = await storeAsImage(1, true);
-  
-          console.log('generating base64Large...')
-    
-          storeAsImage = fromPath(path, getLargeImageOptions(width, height));
-          base64Large = await storeAsImage(1, true);
-    
-          console.log('generating base64XLarge...')
-    
-          storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
-          base64XLarge = await storeAsImage(1, true);
-    
-          console.log('done');
-        }
-        catch(err) {
-          console.log('failed to generate images');
-          console.log(err);
-          if(err.code === 'ENOMEM') {
-            console.log('not enough memory, restarting...');
+            console.log('generating base64Small...')
+
+            let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+            base64Small = await storeAsImage(1, true);
+
+            console.log('generating base64Large...')
+
+            storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+            base64Large = await storeAsImage(1, true);
+
+            console.log('generating base64XLarge...')
+
+            storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+            base64XLarge = await storeAsImage(1, true);
+
+            console.log('done');
           }
-          process.exit(1);
-        }
-      }
-
-      const posterUrl = getPosterURL(endpoint, folder, useGroupName, eventid, posterid);
-
-      if(generateQR) {
-
-        console.log('generating base64qrcode...')
-
-        base64qrcode = (await QR.toDataURL(posterUrl, { scale: 8 })).replace('data:image/png;base64,', '');
-      }
-
-      const payload = {
-        smallImage: base64Small ? base64Small.base64 : '',
-        largeImage: base64Large ? base64Large.base64 : '',
-        xlargeImage: base64XLarge ? base64XLarge.base64 : '',
-        base64qrcode : base64qrcode,
-
-        template : template,
-        folder : folder,
-        posterid : posterid,
-        eventid : eventid,
-        email : email,
-        abstract : abstract,
-        title : title,
-        authors : authors,
-        affiliates : affiliates,
-        keywords : keywords,
-        adminPassword : adminPassword,
-        posterUrl : posterUrl,
-      
-        narrationWavUrl : narrationWavUrl,
-        pdfUrl : pdfUrl,
-      };
-
-      console.log('writing last payload to file');
-
-      fs.writeFile("./last-payload.txt", JSON.stringify(payload), function(err) {
-        if (err) {
+          catch (err) {
+            console.log('failed to generate images');
             console.log(err);
-        }
-      });
-
-      let loop = true;
-      let timeout = 60 * 1000;
-      let started = new Date().getTime();
-
-      console.log(`submit to php loop`);
-
-      while(loop && ((new Date().getTime() - started) < timeout)) {
-
-        console.log(`sending to ${endpoint} (now = ${new Date().getTime()}, started = ${started})`);
-
-        await got.post(endpoint, { json: payload }).then(response => {
-          console.log(response.body);
-
-          if(response.body === 'ok') {
-            loop = false;
-            console.log('sent to php');
-
-            moveSubmissionToHistory(submissionID, eventid, posterid);
-            inProcess.splice(inProcess.indexOf(submissionID));
+            if (err.code === 'ENOMEM') {
+              console.log('not enough memory, restarting...');
+            }
+            process.exit(1);
           }
-        }).catch(error => {
-          console.log(`failed to send to php, error: ${error}`);
+        }
+
+        const posterUrl = getPosterURL(endpoint, folder, useGroupName, eventid, posterid);
+
+        if (generateQR) {
+
+          console.log('generating base64qrcode...')
+
+          base64qrcode = (await QR.toDataURL(posterUrl, { scale: 8 })).replace('data:image/png;base64,', '');
+        }
+
+        const payload = {
+          smallImage: base64Small ? base64Small.base64 : '',
+          largeImage: base64Large ? base64Large.base64 : '',
+          xlargeImage: base64XLarge ? base64XLarge.base64 : '',
+          base64qrcode: base64qrcode,
+
+          template: template,
+          folder: folder,
+          posterid: posterid,
+          eventid: eventid,
+          email: email,
+          abstract: abstract,
+          title: title,
+          authors: authors,
+          affiliates: affiliates,
+          keywords: keywords,
+          adminPassword: adminPassword,
+          posterUrl: posterUrl,
+
+          narrationWavUrl: narrationWavUrl,
+          pdfUrl: pdfUrl,
+        };
+
+        console.log('writing last payload to file');
+
+        fs.writeFile("./last-payload.txt", JSON.stringify(payload), function (err) {
+          if (err) {
+            console.log(err);
+          }
         });
 
-        await sleep(2000);
-      }
+        let loop = true;
+        let timeout = 60 * 1000;
+        let started = new Date().getTime();
 
-      if(loop) {
-        console.log(`timed out sending to php data of [${posterid}]`);
-        inProcess.splice(inProcess.indexOf(submissionID));
-      }        
-    });
+        console.log(`submit to php loop`);
+
+        while (loop && ((new Date().getTime() - started) < timeout)) {
+
+          console.log(`sending to ${endpoint} (now = ${new Date().getTime()}, started = ${started})`);
+
+          await got.post(endpoint, { json: payload }).then(response => {
+            console.log(response.body);
+
+            if (response.body === 'ok') {
+              loop = false;
+              console.log('sent to php');
+
+              moveSubmissionToHistory(submissionID, eventid, posterid);
+              inProcess.splice(inProcess.indexOf(submissionID));
+            }
+          }).catch(error => {
+            console.log(`failed to send to php, error: ${error}`);
+          });
+
+          await sleep(2000);
+        }
+
+        if (loop) {
+          console.log(`timed out sending to php data of [${posterid}]`);
+          inProcess.splice(inProcess.indexOf(submissionID));
+        }
+      });
   } catch (exception) {
     const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
     inProcess.splice(inProcess.indexOf(submissionID));
@@ -348,7 +348,7 @@ function moveSubmissionToHistory(submissionID, eventid, posterid) {
 
     const folder = submissionsHistoryFolder + eventid + '/';
 
-    if(!fs.existsSync(folder)) {
+    if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder, { recursive: true });
     }
 
@@ -366,15 +366,15 @@ async function processCache() {
 
     const folder = submissionsCacheFolder;
 
-    if(!fs.existsSync(folder)) {
+    if (!fs.existsSync(folder)) {
       return;
     }
 
     const dir = await opendir(folder);
 
-    for await (const dirent of dir) 
-      if(dirent && dirent.name.match(/^(\d+)\.json$/g)) {
-        
+    for await (const dirent of dir)
+      if (dirent && dirent.name.match(/^(\d+)\.json$/g)) {
+
         //console.log(dirent.name);
 
         const json = JSON.parse(fs.readFileSync(folder + dirent.name));
@@ -426,7 +426,7 @@ app.get('/convert', async (req, res) => {
     updateMetadata: false
   })
 
-  if(pdfDoc.getPageCount() < 0) 
+  if (pdfDoc.getPageCount() < 0)
     throw new Error(`pdf file has no pages`);
 
   const page = pdfDoc.getPage(0);
@@ -464,9 +464,9 @@ app.get('/convert', async (req, res) => {
 
     console.log('done');
   }
-  catch(err) {
+  catch (err) {
     console.log(err);
-    if(err.code === 'ENOMEM') {
+    if (err.code === 'ENOMEM') {
       console.log('not enough memory, restarting...');
       process.exit(1);
     }
@@ -486,14 +486,14 @@ app.get('/convert', async (req, res) => {
   const submitUrl = 'https://www.posterpresentations.com/developer/submit/image.php';
   //const submitUrl = 'https://skatilsya.com/test/dwg/submit/image.php';
 
-  while(loop && ((new Date().getTime() - started) < timeout)) {
+  while (loop && ((new Date().getTime() - started) < timeout)) {
 
     console.log(`sending to php... (now = ${new Date().getTime()}, started = ${started})`);
 
     await got.post(submitUrl, { json: payload }).then(response => {
       console.log(response.body);
 
-      if(response.body === 'ok') {
+      if (response.body === 'ok') {
         loop = false;
         console.log('sent to php');
       }
@@ -505,9 +505,9 @@ app.get('/convert', async (req, res) => {
     await sleep(2000);
   }
 
-  if(loop) {
+  if (loop) {
     console.log(`timed out sending to php data of [${posterid}]`);
-  }          
+  }
 
   res.status(200).send('ok');
 });
