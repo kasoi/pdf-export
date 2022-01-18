@@ -58,6 +58,13 @@ const timeNow = () => {
   return new Date().today() + " @ " + new Date().timeNow();
 }
 
+const getThumbnailOptions = (width, height) => {
+  const ratio = width / height;
+  const maxSize = 400;
+  const dpi = maxSize / height;
+  return getImageOptions(maxSize * ratio , maxSize, dpi);
+};
+
 const getSmallImageOptions = (width, height) => {
   const ratio = width / height;
   const maxSize = 800;
@@ -233,9 +240,18 @@ function processSubmissionBody(body) {
 
             console.log(`width = ${width}, height = ${height}`);
 
+            console.log(getThumbnailImageOptions(width, height));
             console.log(getSmallImageOptions(width, height));
             console.log(getLargeImageOptions(width, height));
             console.log(getXLargeImageOptions(width, height));
+
+            if(useGroupName) {
+
+              console.log('generating base64Thumbnail...')
+
+              let storeAsImage = fromPath(path, getThumbnailImageOptions(width, height));
+              base64Thumbnail = await storeAsImage(1, true);
+            }
 
             console.log('generating base64Small...')
 
@@ -274,10 +290,12 @@ function processSubmissionBody(body) {
         }
 
         const payload = {
+          
           smallImage: base64Small ? base64Small.base64 : '',
           largeImage: base64Large ? base64Large.base64 : '',
           xlargeImage: base64XLarge ? base64XLarge.base64 : '',
           base64qrcode: base64qrcode,
+          thumbnail: base64Thumbnail? base64Thumbnail.base64 : '',
 
           template: template,
           folder: folder,
