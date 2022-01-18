@@ -240,7 +240,7 @@ function processSubmissionBody(body) {
 
             console.log(`width = ${width}, height = ${height}`);
 
-            console.log(getThumbnailImageOptions(width, height));
+            console.log(getThumbnailOptions(width, height));
             console.log(getSmallImageOptions(width, height));
             console.log(getLargeImageOptions(width, height));
             console.log(getXLargeImageOptions(width, height));
@@ -249,7 +249,7 @@ function processSubmissionBody(body) {
 
               console.log('generating base64Thumbnail...')
 
-              let storeAsImage = fromPath(path, getThumbnailImageOptions(width, height));
+              let storeAsImage = fromPath(path, getThumbnailOptions(width, height));
               base64Thumbnail = await storeAsImage(1, true);
             }
 
@@ -290,7 +290,7 @@ function processSubmissionBody(body) {
         }
 
         const payload = {
-          
+
           smallImage: base64Small ? base64Small.base64 : '',
           largeImage: base64Large ? base64Large.base64 : '',
           xlargeImage: base64XLarge ? base64XLarge.base64 : '',
