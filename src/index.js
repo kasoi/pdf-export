@@ -216,7 +216,7 @@ function processSubmissionBody(body) {
       .on('close', async () => {
         console.log('pdf was downloaded and written to a local file');
 
-        let base64Small, base64Large, base64XLarge, base64qrcode = "";
+        let base64Small, base64Large, base64XLarge, base64Thumbnail, base64qrcode = "";
 
         if (generateImages) {
 
