@@ -433,8 +433,8 @@ app.get('/', (req, res) => {
 
 app.get('/convert', async (req, res) => {
 
-  const path = `./assets/STPE20.pdf`;
-  //const path = `./assets/Kaiser-Permanente-Advance-Health-Care-Directive.pdf`;
+  //const path = `./assets/STPE20.pdf`;
+  const path = `./assets/Kaiser-Permanente-Advance-Health-Care-Directive.pdf`;
   //const path = `./assets/small-image-test.pdf`;
   console.log(path);
 
