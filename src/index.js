@@ -62,14 +62,16 @@ const getThumbnailOptions = (width, height) => {
   const ratio = width / height;
   const maxSize = 400;
   const dpi = maxSize / height;
-  return getImageOptions(maxSize * ratio , maxSize, 4 * dpi, 90);
+  return getImageOptions(maxSize * ratio , maxSize, dpi, 90);
+  //return getImageOptions(maxSize * ratio , maxSize, 4 * dpi, 90);
 };
 
 const getSmallImageOptions = (width, height) => {
   const ratio = width / height;
   const maxSize = 800;
   const dpi = maxSize / width;
-  return getImageOptions(maxSize, maxSize / ratio, 4 * dpi, 98);
+  return getImageOptions(maxSize, maxSize / ratio, dpi, 98);
+  //return getImageOptions(maxSize, maxSize / ratio, 4 * dpi, 98);
 };
 
 const getLargeImageOptions = (width, height) => {
@@ -98,7 +100,7 @@ const getImageOptions = (width, heigth, dpi, quality = 95) => {
   const options = {
     width: Math.round(width),
     height: Math.round(heigth),
-    density: Math.round(dpi),
+    density: Math.round(dpi) * 4,
     format: 'jpg',
     quality: quality
   };
@@ -434,7 +436,8 @@ app.get('/', (req, res) => {
 app.get('/convert', async (req, res) => {
 
   //const path = `./assets/STPE20.pdf`;
-  const path = `./assets/2017 finalposterCAPC2 (2).pdf`;
+  //const path = `./assets/2017 finalposterCAPC2 (2).pdf`;
+  const path = `./assets/CU-3.pdf`;
   //const path = `./assets/small-image-test.pdf`;
   console.log(path);
 
