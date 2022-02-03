@@ -62,7 +62,7 @@ const getThumbnailOptions = (width, height) => {
   const ratio = width / height;
   const maxSize = 400;
   const dpi = maxSize / height;
-  return getImageOptions(maxSize * ratio , maxSize, dpi, 80);
+  return getImageOptions(maxSize * ratio , maxSize, 4 * dpi, 90);
 };
 
 const getSmallImageOptions = (width, height) => {
