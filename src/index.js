@@ -429,7 +429,7 @@ app.post('/size', async (req, res) => {
 
   const origin = (req.headers.origin || "*");
 
-  const pdfDoc = await PDFDocument.load(req.body.resume, {
+  const pdfDoc = await PDFDocument.load(req.body.pdf, {
     updateMetadata: false
   })
 
