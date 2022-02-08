@@ -447,8 +447,10 @@ app.post('/size', async (req, res) => {
 
   try {
 
+    let pdfDoc;
+    
     try {
-    const pdfDoc = await PDFDocument.load(req.body.pdf, {
+      pdfDoc = await PDFDocument.load(req.body.pdf, {
       updateMetadata: false
     })
     } catch(err) {
