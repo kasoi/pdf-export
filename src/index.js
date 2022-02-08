@@ -418,6 +418,13 @@ function sleep(ms) {
 
 ////////////// pdf-size //////////////////////////////////////////////
 
+function round(num, precision = 0) {
+  if(precision < 0)
+    throw new Error('wrong argument, precision must be >= 0');
+
+  return + (Math.round(num + `e+${precision}`)  + `e-${precision}`);
+}
+
 app.post('/size', async (req, res) => {
 
   const origin = (req.headers.origin || "*");
@@ -442,8 +449,11 @@ app.post('/size', async (req, res) => {
   const height = page.getHeight() / 72; // page height in inches
 
 
-  console.log(`width = ${Math.round(width)}, height = ${Math.round(height)}`);
-  console.log(`ratio = ${width / height}, ratio(rounded) = ${Math.round(width / height)}`);
+  // console.log(`width = ${Math.round(width, 2)}, height = ${Math.round(height)}`);
+  // console.log(`ratio = ${width / height}, ratio(rounded) = ${Math.round(width / height)}`);
+
+  console.log(`width = ${width}, height = ${height}`);
+
 
   //console.log(req.body);
 
@@ -453,7 +463,12 @@ app.post('/size', async (req, res) => {
     "Content-type": "application/json"
   }
 
-  res.status(200).header(headers).json({requestBody: req.body})
+  const payload = {
+    width,
+    height,
+  }
+
+  res.status(200).header(headers).json(payload);
 });
 
 ////////////// test routes ////////////////////////////////
