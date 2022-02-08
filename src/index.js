@@ -442,7 +442,8 @@ app.post('/size', async (req, res) => {
   const height = page.getHeight() / 72; // page height in inches
 
 
-  console.log(`width = ${width}, height = ${height}`);
+  console.log(`width = ${Math.round(width)}, height = ${Math.round(height)}`);
+  console.log(`ratio = ${width / height}, ratio(rounded) = ${Math.round(width / height)}`);
 
   //console.log(req.body);
 
@@ -499,8 +500,6 @@ app.get('/convert', async (req, res) => {
 
   console.log(`width = ${width}, height = ${height}`);
 
-
-  console.log(`width = ${width}, height = ${height}`);
 
   console.log(getSmallImageOptions(width, height));
   console.log(getLargeImageOptions(width, height));
