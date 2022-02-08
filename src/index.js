@@ -7,7 +7,7 @@ import got from 'got';
 import util from 'util';
 import { opendir } from 'fs/promises';
 import QR from 'qrcode';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFParsingError } from 'pdf-lib';
 
 console.log('starting service');
 
@@ -473,6 +473,9 @@ app.post('/size', async (req, res) => {
     res.status(200).header(headers).json(payload);
 
   } catch (err) {
+    if (err instanceof PDFParsingError) {
+      res.status(201).send('loh');
+    }
     console.log(err);
     console.log(`ERR: processCache, exception = ${err.message}`);
   }
