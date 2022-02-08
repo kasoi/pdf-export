@@ -415,6 +415,22 @@ function sleep(ms) {
   });
 }
 
+////////////// pdf-size //////////////////////////////////////////////
+
+app.get('/size', async (req, res) => {
+
+  console.log(req.data);
+
+  const headers = {
+    "Access-Control-Allow-Headers": "x-requested-with",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Credentials": "true",
+    "Content-type": "application/json"
+  }
+
+  res.status(200).header(headers).send('ok');//.send("server is running");
+});
+
 ////////////// test routes ////////////////////////////////
 
 app.get('/qr', async (req, res) => {
