@@ -419,7 +419,7 @@ function sleep(ms) {
 
 app.post('/size', async (req, res) => {
 
-  const origin = (request.headers.origin || "*");
+  const origin = (req.headers.origin || "*");
 
   console.log(req.data);
 
