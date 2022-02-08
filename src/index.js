@@ -427,48 +427,55 @@ function round(num, precision = 0) {
 
 app.post('/size', async (req, res) => {
 
-  const origin = (req.headers.origin || "*");
+  try {
 
-  const pdfDoc = await PDFDocument.load(req.body.pdf, {
-    updateMetadata: false
-  })
+    const origin = (req.headers.origin || "*");
 
-  if (pdfDoc.getPageCount() < 0)
-    throw new Error(`pdf file has no pages`);
+    const pdfDoc = await PDFDocument.load(req.body.pdf, {
+      updateMetadata: false
+    })
 
-  // const existingPdfBytes = fs.readFileSync("assets/work.pdf");
+    if (pdfDoc.getPageCount() < 0)
+      throw new Error(`pdf file has no pages`);
 
-  // // Load a PDFDocument without updating its existing metadata
-  // const pdfDoc = await PDFDocument.load(existingPdfBytes, {
-  //   updateMetadata: false
-  // })
+    // const existingPdfBytes = fs.readFileSync("assets/work.pdf");
 
-  const page = pdfDoc.getPage(0);
+    // // Load a PDFDocument without updating its existing metadata
+    // const pdfDoc = await PDFDocument.load(existingPdfBytes, {
+    //   updateMetadata: false
+    // })
 
-  const width = page.getWidth() / 72; // pdf width in inches
-  const height = page.getHeight() / 72; // page height in inches
+    const page = pdfDoc.getPage(0);
 
-
-  // console.log(`width = ${Math.round(width, 2)}, height = ${Math.round(height)}`);
-  // console.log(`ratio = ${width / height}, ratio(rounded) = ${Math.round(width / height)}`);
-
-  console.log(`width = ${width}, height = ${height}`);
+    const width = page.getWidth() / 72; // pdf width in inches
+    const height = page.getHeight() / 72; // page height in inches
 
 
-  //console.log(req.body);
+    // console.log(`width = ${Math.round(width, 2)}, height = ${Math.round(height)}`);
+    // console.log(`ratio = ${width / height}, ratio(rounded) = ${Math.round(width / height)}`);
 
-  const headers = {
-    "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
-    "Content-type": "application/json"
+    console.log(`width = ${width}, height = ${height}`);
+
+
+    //console.log(req.body);
+
+    const headers = {
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+      "Content-type": "application/json"
+    }
+
+    const payload = {
+      width,
+      height,
+    }
+
+    res.status(200).header(headers).json(payload);
+
+  } catch (err) {
+    console.log(err);
+    console.log(`ERR: processCache, exception = ${err.message}`);
   }
-
-  const payload = {
-    width,
-    height,
-  }
-
-  res.status(200).header(headers).json(payload);
 });
 
 ////////////// test routes ////////////////////////////////
