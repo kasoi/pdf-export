@@ -7,7 +7,7 @@ import got from 'got';
 import util from 'util';
 import { opendir } from 'fs/promises';
 import QR from 'qrcode';
-import { PDFDocument, PDFParsingError } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 
 console.log('starting service');
 
@@ -418,22 +418,43 @@ function sleep(ms) {
 
 ////////////// pdf-size //////////////////////////////////////////////
 
-function round(num, precision = 0) {
-  if(precision < 0)
-    throw new Error('wrong argument, precision must be >= 0');
-
-  return + (Math.round(num + `e+${precision}`)  + `e-${precision}`);
+function PDFNoPagesError () {
+  const desc = `pdf file has no pages`;
 }
+
+PDFNoPagesError.prototype = new Error();
+
+class PDFParseError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'PDFParseError';
+    this.desc = 'couldn\'t parse PDF file';
+  }
+}
+
+app.use(function(req, res, next) {
+
+  const origin = (req.headers.origin || "*");
+
+  res.header("Access-Control-Allow-Origin", origin);
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Content-type", "application/json");
+
+  next();
+});
 
 app.post('/size', async (req, res) => {
 
   try {
 
-    const origin = (req.headers.origin || "*");
-
+    try {
     const pdfDoc = await PDFDocument.load(req.body.pdf, {
       updateMetadata: false
     })
+    } catch(err) {
+
+      throw new PDFParseError(err.message);
+    }
 
     if (pdfDoc.getPageCount() < 0)
       throw new Error(`pdf file has no pages`);
@@ -451,33 +472,28 @@ app.post('/size', async (req, res) => {
     const height = page.getHeight() / 72; // page height in inches
 
 
-    // console.log(`width = ${Math.round(width, 2)}, height = ${Math.round(height)}`);
-    // console.log(`ratio = ${width / height}, ratio(rounded) = ${Math.round(width / height)}`);
 
     console.log(`width = ${width}, height = ${height}`);
 
 
     //console.log(req.body);
 
-    const headers = {
-      "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
-      "Content-type": "application/json"
-    }
 
     const payload = {
       width,
       height,
     }
 
-    res.status(200).header(headers).json(payload);
+    res.status(200).json(payload);
 
   } catch (err) {
-    if (err instanceof PDFParsingError) {
-      res.status(201).send('loh');
+    if (err instanceof PDFParseError) {
+      res.status(500).send('loh');
+    } else if (err instanceof MissingPDFHeaderError) {
+      res.status(400).send('loh');
+    } else {
+      console.log(`ERR: processCache, exception = ${err.message}`);
     }
-    console.log(err);
-    console.log(`ERR: processCache, exception = ${err.message}`);
   }
 });
 
