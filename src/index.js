@@ -488,9 +488,7 @@ app.post('/size', async (req, res) => {
 
   } catch (err) {
     if (err instanceof PDFParseError) {
-      res.status(500).send('loh');
-    } else if (err instanceof MissingPDFHeaderError) {
-      res.status(400).send('loh');
+      res.status(500).send('loh')
     } else {
       console.log(`ERR: processCache, exception = ${err.message}`);
     }
