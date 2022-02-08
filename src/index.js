@@ -419,12 +419,13 @@ function sleep(ms) {
 
 app.get('/size', async (req, res) => {
 
+  const origin = (request.headers.origin || "*");
+
   console.log(req.data);
 
   const headers = {
-    "Access-Control-Allow-Headers": "x-requested-with",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
     "Content-type": "application/json"
   }
 
