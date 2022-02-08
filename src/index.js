@@ -18,6 +18,7 @@ let inProcess = [];
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+app.use(bodyParser.json());
 
 app.post('/submit', multer().single(), (req, res) => processSubmission(req, res));
 
@@ -421,7 +422,29 @@ app.post('/size', async (req, res) => {
 
   const origin = (req.headers.origin || "*");
 
-  console.log(req.data);
+  const pdfDoc = await PDFDocument.load(req.body.resume, {
+    updateMetadata: false
+  })
+
+  if (pdfDoc.getPageCount() < 0)
+    throw new Error(`pdf file has no pages`);
+
+  // const existingPdfBytes = fs.readFileSync("assets/work.pdf");
+
+  // // Load a PDFDocument without updating its existing metadata
+  // const pdfDoc = await PDFDocument.load(existingPdfBytes, {
+  //   updateMetadata: false
+  // })
+
+  const page = pdfDoc.getPage(0);
+
+  const width = page.getWidth() / 72; // pdf width in inches
+  const height = page.getHeight() / 72; // page height in inches
+
+
+  console.log(`width = ${width}, height = ${height}`);
+
+  //console.log(req.body);
 
   const headers = {
     "Access-Control-Allow-Origin": origin,
@@ -429,7 +452,7 @@ app.post('/size', async (req, res) => {
     "Content-type": "application/json"
   }
 
-  res.status(200).header(headers).send('ok');//.send("server is running");
+  res.status(200).header(headers).json({requestBody: req.body})
 });
 
 ////////////// test routes ////////////////////////////////
