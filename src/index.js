@@ -417,7 +417,7 @@ function sleep(ms) {
 
 ////////////// pdf-size //////////////////////////////////////////////
 
-app.get('/size', async (req, res) => {
+app.post('/size', async (req, res) => {
 
   const origin = (request.headers.origin || "*");
 
