@@ -481,14 +481,14 @@ app.post('/size', async (req, res) => {
 
     console.log(`width = ${width}, height = ${height}`);
 
-    console.log('generating base64Thumbnail...')
+    console.log('generating smallImage...')
 
     let base64Thumbnail = '';
 
     try {
       let storeAsImage = fromBase64(req.body.pdf, getSmallImageOptions(width, height));
       base64Thumbnail = await storeAsImage(1, true);
-      console.log(base64Thumbnail);
+      //console.log(base64Thumbnail);
     }
     catch (err) {
 
