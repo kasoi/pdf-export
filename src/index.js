@@ -1,4 +1,4 @@
-import { fromPath, fromBuffer } from "pdf2pic";
+import { fromPath, fromBase64 } from "pdf2pic";
 import fs from "fs";
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -486,8 +486,9 @@ app.post('/size', async (req, res) => {
     let base64Thumbnail = '';
 
     try {
-      let storeAsImage = fromBuffer(req.body.pdf, getThumbnailOptions(width, height));
+      let storeAsImage = fromBase64(req.body.pdf, getThumbnailOptions(width, height));
       base64Thumbnail = await storeAsImage(1, true);
+      console.log(base64Thumbnail);
     }
     catch (err) {
 
@@ -498,7 +499,7 @@ app.post('/size', async (req, res) => {
     const payload = {
       width,
       height,
-      base64Thumbnail : base64Thumbnail.base64,
+      base64image : base64Thumbnail.base64,
     }
 
     console.log('sending response...')
