@@ -498,9 +498,10 @@ app.post('/size', async (req, res) => {
     const payload = {
       width,
       height,
-      base64Thumbnail,
+      base64Thumbnail : base64Thumbnail.base64,
     }
 
+    console.log('sending respone...')
     res.status(200).json(payload);
 
   } catch (err) {
