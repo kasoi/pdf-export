@@ -486,7 +486,7 @@ app.post('/size', async (req, res) => {
     let base64Thumbnail = '';
 
     try {
-      let storeAsImage = fromBase64(req.body.pdf.replace('data:application/pdf;base64,', ''), getThumbnailOptions(width, height));
+      let storeAsImage = fromBase64(req.body.pdf, getSmallImageOptions(width, height));
       base64Thumbnail = await storeAsImage(1, true);
       console.log(base64Thumbnail);
     }
