@@ -1,4 +1,4 @@
-import { fromPath } from "pdf2pic";
+import { fromPath, fromBase64 } from "pdf2pic";
 import fs from "fs";
 import express from 'express';
 import bodyParser from 'body-parser';
