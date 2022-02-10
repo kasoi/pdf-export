@@ -418,17 +418,25 @@ function sleep(ms) {
 
 ////////////// pdf-size //////////////////////////////////////////////
 
-function PDFNoPagesError () {
-  const desc = `pdf file has no pages`;
-}
-
-PDFNoPagesError.prototype = new Error();
-
 class PDFParseError extends Error {
   constructor(message) {
     super(message);
-    this.name = 'PDFParseError';
     this.desc = 'couldn\'t parse PDF file';
+  }
+}
+
+class PDFNoPagesError extends Error {
+  constructor(message) {
+    super(message);
+    this.desc = 'pdf file has no pages';
+  }
+}
+
+class GenerateThumbnailError extends Error {
+  constructor(message, restart = false) {
+    super(message);
+    this.desc = 'failed to generate thumbnail';
+    this.restartNeeded;
   }
 }
 
@@ -445,54 +453,70 @@ app.use(function(req, res, next) {
 
 app.post('/size', async (req, res) => {
 
+  console.log('size calc');
+  //throw new Error("err");
+
   try {
 
     let pdfDoc;
-    
+
     try {
       pdfDoc = await PDFDocument.load(req.body.pdf, {
-      updateMetadata: false
-    })
+        updateMetadata: false
+      })
     } catch(err) {
 
       throw new PDFParseError(err.message);
     }
 
     if (pdfDoc.getPageCount() < 0)
-      throw new Error(`pdf file has no pages`);
-
-    // const existingPdfBytes = fs.readFileSync("assets/work.pdf");
-
-    // // Load a PDFDocument without updating its existing metadata
-    // const pdfDoc = await PDFDocument.load(existingPdfBytes, {
-    //   updateMetadata: false
-    // })
+      throw new PDFNoPagesError(`pdf file has no pages`);
 
     const page = pdfDoc.getPage(0);
+
+    console.log('opened pdf');
 
     const width = page.getWidth() / 72; // pdf width in inches
     const height = page.getHeight() / 72; // page height in inches
 
-
-
     console.log(`width = ${width}, height = ${height}`);
 
+    console.log('generating base64Thumbnail...')
 
-    //console.log(req.body);
+    let base64Thumbnail = '';
 
+    try {
+      let storeAsImage = fromPath(path, getThumbnailOptions(width, height));
+      base64Thumbnail = await storeAsImage(1, true);
+    }
+    catch (err) {
+
+      throw new GenerateThumbnailError('failed to generate thumbnail', err.code === 'ENOMEM');
+    }
 
     const payload = {
       width,
       height,
+      base64Thumbnail,
     }
 
     res.status(200).json(payload);
 
   } catch (err) {
-    if (err instanceof PDFParseError) {
-      res.status(500).send('loh')
+    if (err instanceof PDFParseError ||
+        err instanceof PDFNoPagesError ||
+        err instanceof GenerateThumbnailError ) {
+      console.log(`ERR: ${err.desc}`);
+      //console.log(err.message);
+      res.status(500).json( { error : err.desc });
+
+      if(err.restartNeeded) {
+        console.log('not enough memory, restarting...');
+        process.exit(1);
+      }
     } else {
-      console.log(`ERR: processCache, exception = ${err.message}`);
+      console.log(`ERR: , exception = ${err.message}`);
+      res.status(500).json( { error : 'server error' });
     }
   }
 });
