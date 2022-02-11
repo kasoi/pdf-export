@@ -17,8 +17,8 @@ const submissionsHistoryFolder = './submissions-history/';
 let inProcess = [];
 
 const app = express();
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ limit: '20mb', extended: true })); // support encoded bodies
+app.use(bodyParser.json({limit: '20mb'}));
 
 app.post('/submit', multer().single(), (req, res) => processSubmission(req, res));
 
