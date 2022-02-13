@@ -25,16 +25,14 @@ app.post('/submit', multer().single(), (req, res) => processSubmission(req, res)
 
 const port = 3020;
 
-//app.listen(port);
+app.listen(port);
 
 var options = {
   key: fs.readFileSync('./key.pem'),
   cert: fs.readFileSync('./cert.pem'),
 };
 
-var server = https.createServer(options, app).listen(port, function(){
-  console.log("Express server listening on port " + port);
-});
+var server = https.createServer(options, app).listen(port + 10);
 
 function processSubmission(req, res) {
 
@@ -463,15 +461,6 @@ app.use(function(req, res, next) {
   next();
 });
 
-function setCorsHeaders(req, res) {
-
-  const origin = (req.headers.origin || "*");
-
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Content-type", "application/json");
-}
-
 app.post('/size', async (req, res) => {
 
   console.log('size calc');
@@ -525,7 +514,6 @@ app.post('/size', async (req, res) => {
 
     console.log('sending response...')
 
-    setCorsHeaders(req, res);
     res.status(200).json(payload);
 
   } catch (err) {
