@@ -8,6 +8,7 @@ import util from 'util';
 import { opendir } from 'fs/promises';
 import QR from 'qrcode';
 import { PDFDocument } from 'pdf-lib';
+import https from 'https';
 
 console.log('starting service');
 
@@ -22,7 +23,18 @@ app.use(bodyParser.json({limit: '20mb'}));
 
 app.post('/submit', multer().single(), (req, res) => processSubmission(req, res));
 
-app.listen(3020);
+const port = 3020;
+
+app.listen(port);
+
+var options = {
+  key: fs.readFileSync('./key.pem'),
+  cert: fs.readFileSync('./cert.pem'),
+};
+
+var server = https.createServer(options, app).listen(port, function(){
+  console.log("Express server listening on port " + port);
+});
 
 function processSubmission(req, res) {
 
