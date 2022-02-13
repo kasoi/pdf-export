@@ -24,7 +24,7 @@ app.use(bodyParser.json({limit: '20mb'}));
 app.post('/submit', multer().single(), (req, res) => processSubmission(req, res));
 
 const httpPort = 3020;
-const httpsPort = 3020;
+const httpsPort = 3030;
 
 app.listen(httpPort);
 
