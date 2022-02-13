@@ -23,16 +23,19 @@ app.use(bodyParser.json({limit: '20mb'}));
 
 app.post('/submit', multer().single(), (req, res) => processSubmission(req, res));
 
-const port = 3020;
+const httpPort = 3020;
+const httpsPort = 3020;
 
-app.listen(port);
+app.listen(httpPort);
 
 var options = {
   key: fs.readFileSync('./key.pem'),
   cert: fs.readFileSync('./cert.pem'),
 };
 
-var server = https.createServer(options, app).listen(port + 10);
+var server = https.createServer(options, app).listen(httpsPort, () => {
+  console.log('https is listening at ', httpsPort);
+});
 
 function processSubmission(req, res) {
 
