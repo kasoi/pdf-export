@@ -29,7 +29,7 @@ const httpsPort = 3030;
 
 //app.listen(httpPort);
 
-http.createServer(app).listen(httpPort);
+//http.createServer(app).listen(httpPort);
 
 var options = {
   key: fs.readFileSync('./key.pem'),
