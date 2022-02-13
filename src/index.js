@@ -9,6 +9,7 @@ import { opendir } from 'fs/promises';
 import QR from 'qrcode';
 import { PDFDocument } from 'pdf-lib';
 import https from 'https';
+import http from 'http';
 
 console.log('starting service');
 
@@ -24,16 +25,18 @@ app.use(bodyParser.json({limit: '20mb'}));
 app.post('/submit', multer().single(), (req, res) => processSubmission(req, res));
 
 const httpPort = 3020;
-const httpsPort = 3030;
+const httpsPort = 443;
 
-app.listen(httpPort);
+//app.listen(httpPort);
+
+http.createServer(app).listen(httpPort);
 
 var options = {
   key: fs.readFileSync('./key.pem'),
   cert: fs.readFileSync('./cert.pem'),
 };
 
-var server = https.createServer(options, app).listen(httpsPort, () => {
+https.createServer(options, app).listen(httpsPort, () => {
   console.log('https is listening at ', httpsPort);
 });
 
