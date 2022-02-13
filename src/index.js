@@ -463,6 +463,15 @@ app.use(function(req, res, next) {
   next();
 });
 
+setCorsHeaders = (req, res) => {
+
+  const origin = (req.headers.origin || "*");
+
+  res.header("Access-Control-Allow-Origin", origin);
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Content-type", "application/json");
+}
+
 app.post('/size', async (req, res) => {
 
   console.log('size calc');
@@ -515,6 +524,8 @@ app.post('/size', async (req, res) => {
     }
 
     console.log('sending response...')
+
+    setCorsHeaders(req, res);
     res.status(200).json(payload);
 
   } catch (err) {
