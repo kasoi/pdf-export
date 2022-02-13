@@ -463,7 +463,7 @@ app.use(function(req, res, next) {
   next();
 });
 
-setCorsHeaders = (req, res) => {
+function setCorsHeaders(req, res) {
 
   const origin = (req.headers.origin || "*");
 
