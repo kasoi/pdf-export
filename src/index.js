@@ -25,7 +25,7 @@ app.post('/submit', multer().single(), (req, res) => processSubmission(req, res)
 
 const port = 3020;
 
-app.listen(port);
+//app.listen(port);
 
 var options = {
   key: fs.readFileSync('./key.pem'),
