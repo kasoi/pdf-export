@@ -543,6 +543,11 @@ app.post('/size', async (req, res) => {
 
 ////////////// test routes ////////////////////////////////
 
+app.post('/post', async (req, res) => {
+  console.log('recieved post');
+  res.status(200).send('recieved post');
+});
+
 app.get('/qr', async (req, res) => {
 
   const url = 'https://www.posterpresentations.com/research/groups/TAFP/TAFP12/TAFP12.html';
