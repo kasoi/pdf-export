@@ -22,16 +22,16 @@ const app = express();
 app.use(bodyParser.urlencoded({ limit: '20mb', extended: true })); // support encoded bodies
 app.use(bodyParser.json({limit: '20mb'}));
 
-app.use(function(req, res, next) {
+// app.use(function(req, res, next) {
 
-  const origin = (req.headers.origin || "*");
+//   const origin = (req.headers.origin || "*");
 
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Content-type", "application/json");
+//   res.header("Access-Control-Allow-Origin", origin);
+//   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//   res.header("Content-type", "application/json");
 
-  next();
-});
+//   next();
+// });
 
 app.post('/submit', multer().single(), (req, res) => processSubmission(req, res));
 
