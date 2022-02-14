@@ -16,6 +16,9 @@ console.log('starting service');
 const submissionsCacheFolder = './submissions-cache/';
 const submissionsHistoryFolder = './submissions-history/';
 
+const keyPath = "/etc/letsencrypt/live/posterpresentations.ddns.net/privkey.pem";
+const certPath = "/etc/letsencrypt/live/posterpresentations.ddns.net/fullchain.pem";
+
 let inProcess = [];
 
 const app = express();
@@ -43,8 +46,8 @@ const httpsPort = 3030;
 http.createServer(app).listen(httpPort);
 
 var options = {
-  key: fs.readFileSync('./key.pem'),
-  cert: fs.readFileSync('./cert.pem'),
+  key: fs.readFileSync(keyPath),
+  cert: fs.readFileSync(certPath),
 };
 
 https.createServer(options, app).listen(httpsPort, () => {
