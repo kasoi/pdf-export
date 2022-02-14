@@ -47,9 +47,9 @@ var options = {
   cert: fs.readFileSync('./cert.pem'),
 };
 
-// https.createServer(options, app).listen(httpsPort, () => {
-//   console.log('https is listening at ', httpsPort);
-// });
+https.createServer(options, app).listen(httpsPort, () => {
+  console.log('https is listening at ', httpsPort);
+});
 
 function processSubmission(req, res) {
 
