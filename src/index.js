@@ -257,7 +257,7 @@ function processSubmissionBody(body) {
 
           try {
 
-            const existingPdfBytes = fs.readFileSync(path);
+            //const existingPdfBytes = fs.readFileSync(path);
 
             // Load a PDFDocument without updating its existing metadata
             const pdfDoc = await PDFDocument.load(stream, {
