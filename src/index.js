@@ -247,8 +247,8 @@ function processSubmissionBody(body) {
 
 
     got.stream(pdfUrl)
-      .pipe(fs.createWriteStream(path))
-      .on('close', async () => {
+      //.pipe(fs.createWriteStream(path))
+      .on('close', async (stream) => {
         console.log('pdf was downloaded and written to a local file');
 
         let base64Small, base64Large, base64XLarge, base64Thumbnail, base64qrcode = "";
@@ -260,7 +260,7 @@ function processSubmissionBody(body) {
             const existingPdfBytes = fs.readFileSync(path);
 
             // Load a PDFDocument without updating its existing metadata
-            const pdfDoc = await PDFDocument.load(existingPdfBytes, {
+            const pdfDoc = await PDFDocument.load(stream, {
               updateMetadata: false
             })
 
@@ -284,23 +284,23 @@ function processSubmissionBody(body) {
 
               console.log('generating base64Thumbnail...')
 
-              let storeAsImage = fromPath(path, getThumbnailOptions(width, height));
+              let storeAsImage = fromBuffer(stream, getThumbnailOptions(width, height));
               base64Thumbnail = await storeAsImage(1, true);
             }
 
             console.log('generating base64Small...')
 
-            let storeAsImage = fromPath(path, getSmallImageOptions(width, height));
+            let storeAsImage = fromBuffer(stream, getSmallImageOptions(width, height));
             base64Small = await storeAsImage(1, true);
 
             console.log('generating base64Large...')
 
-            storeAsImage = fromPath(path, getLargeImageOptions(width, height));
+            storeAsImage = fromBuffer(stream, getLargeImageOptions(width, height));
             base64Large = await storeAsImage(1, true);
 
             console.log('generating base64XLarge...')
 
-            storeAsImage = fromPath(path, getXLargeImageOptions(width, height));
+            storeAsImage = fromBuffer(stream, getXLargeImageOptions(width, height));
             base64XLarge = await storeAsImage(1, true);
 
             console.log('done');
