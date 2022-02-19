@@ -245,10 +245,12 @@ function processSubmissionBody(body) {
 
     console.log('attempt to download pdf...');
 
+    var stream;
 
     got.stream(pdfUrl)
       //.pipe(fs.createWriteStream(path))
-      .on('data', async (stream) => {
+      .on('data', (data) => stream += data) 
+      .on('close', async () => {
         console.log('pdf was downloaded and written to a local file');
 
         let base64Small, base64Large, base64XLarge, base64Thumbnail, base64qrcode = "";
