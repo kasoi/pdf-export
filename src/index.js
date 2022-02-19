@@ -45,14 +45,16 @@ const httpsPort = 3030;
 
 http.createServer(app).listen(httpPort);
 
-var options = {
-  key: fs.readFileSync(keyPath),
-  cert: fs.readFileSync(certPath),
-};
+if(fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+  var options = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath),
+  };
 
-https.createServer(options, app).listen(httpsPort, () => {
-  console.log('https is listening at ', httpsPort);
-});
+  https.createServer(options, app).listen(httpsPort, () => {
+    console.log('https is listening at ', httpsPort);
+  });
+}
 
 function processSubmission(req, res) {
 
