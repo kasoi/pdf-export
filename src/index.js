@@ -1,4 +1,4 @@
-import { fromPath, fromBase64 } from "pdf2pic";
+import { fromPath, fromBase64, fromBuffer } from "pdf2pic";
 import fs from "fs";
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -241,17 +241,19 @@ function processSubmissionBody(body) {
 
     console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, posterid = ${posterid}`);
 
-    const path = process.cwd() + `/temp.pdf`;
-
     console.log('attempt to download pdf...');
 
-    var stream;
+    var buffer;
+    var bufs = [];
 
-    got.stream(pdfUrl)
-      //.pipe(fs.createWriteStream(path))
-      .on('data', (data) => stream += data) 
-      .on('close', async () => {
-        console.log('pdf was downloaded and written to a local file');
+    var gotStream = got.stream(pdfUrl);
+
+    gotStream.on('data', (data) => bufs.push(data));
+
+    gotStream.on('end', async () => {
+
+        buffer = Buffer.concat(bufs);
+        console.log('pdf was piped to buffer');
 
         let base64Small, base64Large, base64XLarge, base64Thumbnail, base64qrcode = "";
 
@@ -262,7 +264,7 @@ function processSubmissionBody(body) {
             //const existingPdfBytes = fs.readFileSync(path);
 
             // Load a PDFDocument without updating its existing metadata
-            const pdfDoc = await PDFDocument.load(stream, {
+            const pdfDoc = await PDFDocument.load(buffer, {
               updateMetadata: false
             })
 
@@ -286,23 +288,23 @@ function processSubmissionBody(body) {
 
               console.log('generating base64Thumbnail...')
 
-              let storeAsImage = fromBuffer(stream, getThumbnailOptions(width, height));
+              let storeAsImage = fromBuffer(buffer, getThumbnailOptions(width, height));
               base64Thumbnail = await storeAsImage(1, true);
             }
 
             console.log('generating base64Small...')
 
-            let storeAsImage = fromBuffer(stream, getSmallImageOptions(width, height));
+            let storeAsImage = fromBuffer(buffer, getSmallImageOptions(width, height));
             base64Small = await storeAsImage(1, true);
 
             console.log('generating base64Large...')
 
-            storeAsImage = fromBuffer(stream, getLargeImageOptions(width, height));
+            storeAsImage = fromBuffer(buffer, getLargeImageOptions(width, height));
             base64Large = await storeAsImage(1, true);
 
             console.log('generating base64XLarge...')
 
-            storeAsImage = fromBuffer(stream, getXLargeImageOptions(width, height));
+            storeAsImage = fromBuffer(buffer, getXLargeImageOptions(width, height));
             base64XLarge = await storeAsImage(1, true);
 
             console.log('done');
@@ -390,7 +392,7 @@ function processSubmissionBody(body) {
           console.log(`timed out sending to php data of [${posterid}]`);
           inProcess.splice(inProcess.indexOf(submissionID));
         }
-      }).end();
+      });
   } catch (exception) {
     const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
     inProcess.splice(inProcess.indexOf(submissionID));
