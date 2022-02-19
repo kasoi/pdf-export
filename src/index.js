@@ -243,12 +243,12 @@ function processSubmissionBody(body) {
 
     const path = process.cwd() + `/temp.pdf`;
 
-    console.log('attemp to download pdf...');
+    console.log('attempt to download pdf...');
 
 
     got.stream(pdfUrl)
       //.pipe(fs.createWriteStream(path))
-      .on('close', async (stream) => {
+      .on('data', async (stream) => {
         console.log('pdf was downloaded and written to a local file');
 
         let base64Small, base64Large, base64XLarge, base64Thumbnail, base64qrcode = "";
@@ -388,7 +388,7 @@ function processSubmissionBody(body) {
           console.log(`timed out sending to php data of [${posterid}]`);
           inProcess.splice(inProcess.indexOf(submissionID));
         }
-      });
+      }).end();
   } catch (exception) {
     const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
     inProcess.splice(inProcess.indexOf(submissionID));
