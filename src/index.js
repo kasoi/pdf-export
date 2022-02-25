@@ -202,6 +202,20 @@ function getPosterURL(endpoint, folder, useGroupName, eventid, posterid) {
   return posterUrl;
 }
 
+function getVideoIDFromLink(link) {
+
+  const regexp = new RegExp(/(?:https*\:\/\/)*(?:www\.)*(?:youtu\.be\/|youtube\.com\/watch\?v\=)([A-Za-z\d]+)/g);
+  const matches = regexp.exec(link);
+
+  //const defaultVideoID = "R0UOOVuKVAQ";
+
+  if(matches && matches.length > 0) {
+    return matches[1];
+  }
+
+  return "";
+}
+
 function processSubmissionBody(body) {
 
   const formTitle = body.formTitle;
@@ -232,6 +246,9 @@ function processSubmissionBody(body) {
     const generateImages = getRawRequestField(rawRequest, 'generateImages', false, '1') === '0' ? false : true;
     const useGroupName = getRawRequestField(rawRequest, 'useGroupName', false, '0') === '0' ? false : true;
     const adminPassword = getRawRequestField(rawRequest, 'adminPassword', false);
+    const youtubeLink = getRawRequestField(rawRequest, 'youtubeLink', false);
+
+    const videoid = getVideoIDFromLink(youtubeLink);
     const eventid = useGroupName ? posterid.replace(/([A-Za-z]+).*[0-9]+/g, "$1") : '';
 
     let narrationWavUrl = getRawRequestField(rawRequest, 'addA', false);
@@ -348,6 +365,7 @@ function processSubmissionBody(body) {
           keywords: keywords,
           adminPassword: adminPassword,
           posterUrl: posterUrl,
+          videoid: videoid,
 
           narrationWavUrl: narrationWavUrl,
           pdfUrl: pdfUrl,
