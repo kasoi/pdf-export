@@ -463,7 +463,9 @@ async function processCache() {
 
         const json = JSON.parse(fs.readFileSync(folder + dirent.name));
 
+        console.log(`${dirent.name} from cache needs to be processed [isWorking = ${isWorking}]`);
         processSubmissionBody(json);
+
         sleep(2000);
       }
   } catch (err) {
