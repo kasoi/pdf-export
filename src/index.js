@@ -20,6 +20,7 @@ const keyPath = "/etc/letsencrypt/live/posterpresentations.ddns.net/privkey.pem"
 const certPath = "/etc/letsencrypt/live/posterpresentations.ddns.net/fullchain.pem";
 
 let inProcess = [];
+let isWorking = false;
 
 const app = express();
 app.use(bodyParser.urlencoded({ limit: '20mb', extended: true })); // support encoded bodies
@@ -44,6 +45,8 @@ const httpsPort = 3030;
 //app.listen(httpPort);
 
 http.createServer(app).listen(httpPort);
+
+console.log('https is listening at ', httpPort);
 
 if(fs.existsSync(keyPath) && fs.existsSync(certPath)) {
   var options = {
@@ -226,6 +229,7 @@ function processSubmissionBody(body) {
     return;
   } else {
     inProcess.push(submissionID);
+    isWorking = true;
   }
 
   const rawRequest = JSON.parse(body.rawRequest);
@@ -398,6 +402,7 @@ function processSubmissionBody(body) {
 
               moveSubmissionToHistory(submissionID, eventid, posterid);
               inProcess.splice(inProcess.indexOf(submissionID));
+              isWorking = false;
             }
           }).catch(error => {
             console.log(`failed to send to php, error: ${error}`);
@@ -409,11 +414,13 @@ function processSubmissionBody(body) {
         if (loop) {
           console.log(`timed out sending to php data of [${posterid}]`);
           inProcess.splice(inProcess.indexOf(submissionID));
+          isWorking = false;
         }
       });
   } catch (exception) {
     const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
     inProcess.splice(inProcess.indexOf(submissionID));
+    isWorking = false;
     console.log(errMessage);
   }
 }
@@ -444,6 +451,8 @@ async function processCache() {
     if (!fs.existsSync(folder)) {
       return;
     }
+
+    if(isWorking) return;
 
     const dir = await opendir(folder);
 
