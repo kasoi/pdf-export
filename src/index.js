@@ -224,6 +224,10 @@ function processSubmissionBody(body) {
   const formTitle = body.formTitle;
   const submissionID = body.submissionID;
 
+  if(isWorking) {
+    return;
+  }
+
   if (inProcess.includes(submissionID)) {
     console.log(`submission [${submissionID}] is already being processed. inProcess = ${inProcess}`);
     return;
@@ -437,7 +441,7 @@ function moveSubmissionToHistory(submissionID, eventid, posterid) {
     const originFilePath = submissionsCacheFolder + submissionID + '.json';
     const destinationFilePath = folder + posterid + '.json';
 
-    if (!fs.existsSync(originFilepath)) {
+    if (!fs.existsSync(originFilePath)) {
       console.log(`haven't found [${submissionID}.json] in submission-cache`);
       if (fs.existsSync(destinationFilePath)) {
         console.log(`since [${posterid}.json] exists in submission-history the poster must have been already processed`);
