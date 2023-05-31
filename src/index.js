@@ -434,7 +434,7 @@ function moveSubmissionToHistory(submissionID, eventid, posterid) {
       fs.mkdirSync(folder, { recursive: true });
     }
 
-    const originFilepath = submissionsCacheFolder + submissionID + '.json';
+    const originFilePath = submissionsCacheFolder + submissionID + '.json';
     const destinationFilePath = folder + posterid + '.json';
 
     if (!fs.existsSync(originFilepath)) {
