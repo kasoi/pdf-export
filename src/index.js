@@ -434,7 +434,18 @@ function moveSubmissionToHistory(submissionID, eventid, posterid) {
       fs.mkdirSync(folder, { recursive: true });
     }
 
-    fs.renameSync(submissionsCacheFolder + submissionID + '.json', folder + posterid + '.json');
+    const originFilepath = submissionsCacheFolder + submissionID + '.json';
+    const destinationFilePath = folder + posterid + '.json';
+
+    if (!fs.existsSync(originFilepath)) {
+      console.log(`haven't found [${submissionID}.json] in submission-cache`);
+      if (fs.existsSync(destinationFilePath)) {
+        console.log(`since [${posterid}.json] exists in submission-history the poster must have been already processed`);
+      }
+      return;
+    }
+
+    fs.renameSync(originFilePath, destinationFilePath);
     console.log(`moved submission [${posterid}] to history`);
   } catch (exception) {
     const errMessage = `ERR: failed to move submission json (submissionID = ${submissionID}, posterid = ${posterid}), exception = ${exception.message}`;
@@ -462,6 +473,8 @@ async function processCache() {
         //console.log(dirent.name);
 
         const json = JSON.parse(fs.readFileSync(folder + dirent.name));
+
+        if(isWorking) return;
 
         console.log(`${dirent.name} from cache needs to be processed [isWorking = ${isWorking}]`);
         processSubmissionBody(json);
