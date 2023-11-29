@@ -88,10 +88,6 @@ async function processSubmissionBody(body) {
             if (response.body === 'ok') {
                 loop = false;
                 console.log('sent to php');
-
-                moveSubmissionToHistory(submissionID, eventid, posterid);
-                inProcess.splice(inProcess.indexOf(submissionID));
-                isWorking = false;
             }
             }).catch(error => {
             console.log(`failed to send to php, error: ${error}`);
@@ -102,14 +98,10 @@ async function processSubmissionBody(body) {
 
         if (loop) {
             console.log(`timed out sending to php data of [${posterid}]`);
-            inProcess.splice(inProcess.indexOf(submissionID));
-            isWorking = false;
         }
 
     } catch (exception) {
         const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
-        inProcess.splice(inProcess.indexOf(submissionID));
-        isWorking = false;
         console.log(errMessage);
       }
 }
@@ -118,8 +110,8 @@ async function processSubmissionBody(body) {
 try {
 
     const submissionsHistoryFolder = './submissions-history/';
-    //const minSubmissionId = 5751778643528305330;
-    const minSubmissionId = 5770138744121654408;
+    const minSubmissionId = 5751778643528305330;
+    //const minSubmissionId = 5770138744121654408;
 
     if (!fs.existsSync(submissionsHistoryFolder)) {
         console.log('submissionsHistoryFolder does not exist');
