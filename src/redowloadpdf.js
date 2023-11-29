@@ -50,16 +50,22 @@ try {
 
     if (!fs.existsSync(submissionsHistoryFolder)) {
         console.log('submissionsHistoryFolder does not exist');
-        return;
+        exit(0);
     }
 
+    console.log('opening folder = ', submissionsHistoryFolder);
     const dir = await opendir(submissionsHistoryFolder);
+    console.log('opened folder');
 
-    for await (const dirent of dir)
-      if (dirent && dirent.name.match(/^(\d+)\.json$/g)) {
+    for await(const dirent of dir)
+      if (dirent && dirent.name.match(/^.*\.json$/g)) {
 
-        const json = JSON.parse(fs.readFileSync(folder + dirent.name));
-        const submissionId = Number(getRawRequestField(json, "submissionID", true));
+        //console.log('checking item ', dirent.name);
+
+        const json = JSON.parse(fs.readFileSync(submissionsHistoryFolder + dirent.name));
+        const submissionId = Number(json.submissionID);
+        
+        //console.log('checking submissionID = ', submissionId);
 
         if(submissionId < minSubmissionId) continue;
 
