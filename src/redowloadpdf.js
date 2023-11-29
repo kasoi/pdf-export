@@ -79,7 +79,7 @@ try {
         //sleep(2000);
       }
 
-    submissionsMap = new Map([...map].sort()); 
+    submissionsMap = new Map([...submissionsMap].sort()); 
     console.log([...submissionsMap.entries()])
 } catch (err) {
     console.log(`ERR: redownload error, exception = ${err.message}`);
