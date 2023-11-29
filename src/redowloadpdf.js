@@ -72,13 +72,15 @@ try {
         if(submissionId < minSubmissionId) continue;
 
         submissionsMap.set(submissionId, dirent.name);
-        console.log([...submissionsMap.entries()])
 
         //console.log(`${dirent.name} from cache needs to be processed`);
         //processSubmissionBody(json);
 
         //sleep(2000);
       }
+
+    submissionsMap = new Map([...map].sort()); 
+    console.log([...submissionsMap.entries()])
 } catch (err) {
     console.log(`ERR: redownload error, exception = ${err.message}`);
 }
