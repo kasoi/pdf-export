@@ -57,6 +57,8 @@ try {
     const dir = await opendir(submissionsHistoryFolder);
     console.log('opened folder');
 
+    const submissionsMap = new Map();
+
     for await(const dirent of dir)
       if (dirent && dirent.name.match(/^.*\.json$/g)) {
 
@@ -69,7 +71,10 @@ try {
 
         if(submissionId < minSubmissionId) continue;
 
-        console.log(`${dirent.name} from cache needs to be processed`);
+        submissionsMap.set(submissionId, dirent.name);
+        console.log([...submissionsMap.entries()])
+
+        //console.log(`${dirent.name} from cache needs to be processed`);
         //processSubmissionBody(json);
 
         //sleep(2000);
