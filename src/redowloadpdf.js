@@ -79,8 +79,8 @@ try {
         //sleep(2000);
       }
 
-    submissionsMap = new Map([...submissionsMap].sort()); 
-    console.log([...submissionsMap.entries()])
+    const sortedSubmissionsMap = new Map([...submissionsMap].sort()); 
+    console.log([...sortedSubmissionsMap.entries()])
 } catch (err) {
     console.log(`ERR: redownload error, exception = ${err.message}`);
 }
