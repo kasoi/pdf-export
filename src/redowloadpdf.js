@@ -92,8 +92,6 @@ async function processSubmissionBody(body) {
             }).catch(error => {
             console.log(`failed to send to php, error: ${error}`);
             });
-
-            await sleep(2000);
         }
 
         if (loop) {
@@ -138,10 +136,7 @@ try {
 
         submissionsMap.set(submissionId, dirent.name);
 
-        //console.log(`${dirent.name} from cache needs to be processed`);
-        processSubmissionBody(json);
-
-        //sleep(2000);
+        await processSubmissionBody(json);
       }
 
     const sortedSubmissionsMap = new Map([...submissionsMap].sort()); 
