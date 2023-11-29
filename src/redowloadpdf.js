@@ -42,11 +42,84 @@ function getRawRequestField(rawRequest, propName, required, defaultValue = '') {
     return defaultValue;
 }
 
+async function processSubmissionBody(body) {
+
+    const formTitle = body.formTitle;
+    const submissionID = body.submissionID;
+    const rawRequest = JSON.parse(body.rawRequest);
+  
+    try {
+  
+      const posterid = getRawRequestField(rawRequest, 'posterid', true);
+      const folder = getRawRequestField(rawRequest, 'folderName', true, 'review');
+      const useGroupName = getRawRequestField(rawRequest, 'useGroupName', false, '0') === '0' ? false : true;
+      const endpoint = getRawRequestField(rawRequest, 'endpoint', true).replace('submit.php', 'redownload.php');
+  
+      const eventid = useGroupName ? posterid.replace(/([A-Za-z]+).*[0-9]+/g, "$1") : '';
+  
+      let narrationWavUrl = getRawRequestField(rawRequest, 'addA', false);
+      narrationWavUrl = narrationWavUrl ? "https\:\/\/jotform.com" + narrationWavUrl : narrationWavUrl;
+  
+      const pdfUrl = rawRequest.uploadYour3[0];
+  
+      console.log(`submissionID = ${submissionID}, formTitle = ${formTitle}, posterid = ${posterid}`);
+  
+      const payload = {
+
+        folder: folder,
+        posterid: posterid,
+        eventid: eventid,
+        pdfUrl: pdfUrl,
+      };
+
+        let loop = true;
+        let timeout = 60 * 1000;
+        let started = new Date().getTime();
+
+        console.log(`submit to php loop`);
+
+        while (loop && ((new Date().getTime() - started) < timeout)) {
+
+            console.log(`sending to ${endpoint} (now = ${new Date().getTime()}, started = ${started})`);
+
+            await got.post(endpoint, { json: payload }).then(response => {
+            console.log(response.body);
+
+            if (response.body === 'ok') {
+                loop = false;
+                console.log('sent to php');
+
+                moveSubmissionToHistory(submissionID, eventid, posterid);
+                inProcess.splice(inProcess.indexOf(submissionID));
+                isWorking = false;
+            }
+            }).catch(error => {
+            console.log(`failed to send to php, error: ${error}`);
+            });
+
+            await sleep(2000);
+        }
+
+        if (loop) {
+            console.log(`timed out sending to php data of [${posterid}]`);
+            inProcess.splice(inProcess.indexOf(submissionID));
+            isWorking = false;
+        }
+
+    } catch (exception) {
+        const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
+        inProcess.splice(inProcess.indexOf(submissionID));
+        isWorking = false;
+        console.log(errMessage);
+      }
+}
+
 
 try {
 
     const submissionsHistoryFolder = './submissions-history/';
-    const minSubmissionId = 5751778643528305330;
+    //const minSubmissionId = 5751778643528305330;
+    const minSubmissionId = 5770138744121654408;
 
     if (!fs.existsSync(submissionsHistoryFolder)) {
         console.log('submissionsHistoryFolder does not exist');
@@ -74,13 +147,13 @@ try {
         submissionsMap.set(submissionId, dirent.name);
 
         //console.log(`${dirent.name} from cache needs to be processed`);
-        //processSubmissionBody(json);
+        processSubmissionBody(json);
 
         //sleep(2000);
       }
 
     const sortedSubmissionsMap = new Map([...submissionsMap].sort()); 
-    console.log([...sortedSubmissionsMap.entries()])
+    //console.log([...sortedSubmissionsMap.entries()])
 } catch (err) {
     console.log(`ERR: redownload error, exception = ${err.message}`);
 }
