@@ -108,7 +108,8 @@ async function processSubmissionBody(body) {
 try {
 
     const submissionsHistoryFolder = './submissions-history/';
-    const minSubmissionId = 5751778643528305330;
+    const minSubmissionId = 5692974990027375970;
+    const maxSubmissionId = 5751778643528305330;
     //const minSubmissionId = 5770138744121654408;
 
     if (!fs.existsSync(submissionsHistoryFolder)) {
@@ -132,7 +133,7 @@ try {
         
         //console.log('checking submissionID = ', submissionId);
 
-        if(submissionId < minSubmissionId) continue;
+        if(submissionId < minSubmissionId || submissionId >= maxSubmissionId) continue;
 
         submissionsMap.set(submissionId, dirent.name);
 
