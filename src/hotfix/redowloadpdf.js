@@ -1,15 +1,7 @@
-import { fromPath, fromBase64, fromBuffer } from "pdf2pic";
 import fs from "fs";
-import express from 'express';
-import bodyParser from 'body-parser';
-import multer from 'multer';
 import got from 'got';
-import util from 'util';
 import { opendir } from 'fs/promises';
-import QR from 'qrcode';
-import { PDFDocument } from 'pdf-lib';
-import https from 'https';
-import http from 'http';
+
 
 console.log('starting script');
 

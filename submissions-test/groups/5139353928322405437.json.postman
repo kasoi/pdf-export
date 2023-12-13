@@ -1,0 +1,38 @@
+{
+  "formTitle": "formTitle",
+  "submissionID": "5139353928322405437",
+  "rawRequest": 
+	{
+	  "slug": "submit/220172821496354/",
+	  "q10_posterid": "simplot-7",
+	  "q32_templateName": "groups",
+	  "q34_endpoint": "https://www.posterpresentations.com/developer/submit/submit.php",
+	  "q35_folderName": "groups",
+	  "q36_generateQrcode": "1",
+	  "q37_useGroupName": "1",
+	  "q38_generateImages": "1",
+	  "q1_yourName": {
+		"first": "Goran",
+		"last": "Zelanski"
+	  },
+	  "q2_yourEmail": "upworktest@skatilsya.com",
+	  "q7_posterAbstract": "This is poster abstract i&#039;ve submitted through the jotform",
+	  "file": "",
+	  "q20_addA": "",
+	  "q22_theTitle": "My test poster, 2",
+	  "q23_thePoster": "Donald Trump, Joe Biden",
+	  "q24_thePoster24": "Paramount Pictures",
+	  "q5_keywords": "keyword1, keyword2,keyword3",
+	  "q12_licenseInformation": "Accepted",
+	  "event_id": "1642511567927_220172821496354_L883gdi",
+	  "temp_upload": {
+		"q3_uploadYour3": [
+		  "STPE19.pdf"
+		]
+	  },
+	  "file_server": "geu-sub-d6nj",
+	  "uploadYour3": [
+		"https://www.jotform.com/uploads/upworktest/220172821496354/5183208275015939737/STPE19.pdf"
+	  ]
+	}
+}
