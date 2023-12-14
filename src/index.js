@@ -22,6 +22,7 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ limit: '20mb', extended: true }));
 app.use(bodyParser.json({limit: '20mb'}));
+app.use(bodyParser.raw({limit: '250mb'}));
 
 app.use(function(req, res, next) {
 
