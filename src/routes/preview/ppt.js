@@ -2,7 +2,7 @@ import express from 'express';
 
 import getPDFSizeInInches from '../../convert/pdf_info.js';
 import { generateSmallImage } from '../../convert/pdf2img.js';
-import promisify from 'util';
+import { promisify } from 'util';
 
 import libre from 'libreoffice-convert';
 libre.convertAsync = promisify(libre.convert);
