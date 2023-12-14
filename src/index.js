@@ -51,8 +51,8 @@ if(fs.existsSync(process.env.SSL_KEY_PATH) && fs.existsSync(process.env.SSL_CERT
 {
   var options = 
   {
-    key: fs.readFileSync(keyPath),
-    cert: fs.readFileSync(certPath),
+    key: fs.readFileSync(process.env.SSL_KEY_PATH),
+    cert: fs.readFileSync(process.env.SSL_CERTIFICATE_PATH),
   };
   
   https.createServer(options, app).listen(process.env.HTTPS_PORT, () => 

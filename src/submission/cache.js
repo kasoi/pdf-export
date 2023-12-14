@@ -12,8 +12,7 @@ export async function processCacheLoop()
     
         if (!fs.existsSync(folder)) 
         {
-            console.log(`ERR: SUBMISSIONS_CACHE_FOLDER [${folder}] not found`)
-            return;
+            fs.mkdirSync(folder);
         }
     
         const files = await readdir(folder);
