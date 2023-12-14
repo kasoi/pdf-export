@@ -11,6 +11,7 @@ import './utility/console.js'
 import rootRoute from './routes/root.js'
 import submitRoute from './routes/submit.js'
 import previewPdfRoute from './routes/preview/pdf.js'
+import previewPptRoute from './routes/preview/ppt.js'
 
 import testQRRoute from './routes/test/qr.js'
 
@@ -38,6 +39,7 @@ app.use(function(req, res, next) {
 app.use(rootRoute);
 app.use(submitRoute);
 app.use(previewPdfRoute);
+app.use(previewPptRoute);
 
 app.use(testQRRoute);
 
