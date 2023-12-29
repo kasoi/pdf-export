@@ -15,7 +15,7 @@ router.post('/pdf_preview', async (req, res) =>
 
         if(!pdfBuffer) throw new Error("pdf buffer is empty");
   
-        const {width, height } = await getPDFSizeInInches()
+        const {width, height } = await getPDFSizeInInches(pdfBuffer)
 
         console.log(`width = ${width}, height = ${height}`);
         console.log('generating smallImage...')
