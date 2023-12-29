@@ -11,7 +11,7 @@ router.post('/pdf_preview', async (req, res) =>
     {
         console.log('pdf_preview');
 
-        const pdfBuffer = req.body.pdf;
+        const pdfBuffer = Buffer.from(req.body);
 
         if(!pdfBuffer) throw new Error("pdf buffer is empty");
   
