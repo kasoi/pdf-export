@@ -19,6 +19,7 @@ export default async function getPDFSizeInInches(buffer)
 
     if (pdfDoc.getPageCount() < 0) throw new Error(`pdf file has no pages`);
 
+    console.log(`pdf page count = ${pdfDoc.getPageCount()}`);
     const page = pdfDoc.getPage(0);
 
     return  ({
