@@ -22,7 +22,9 @@ router.post('/ppt_preview', async (req, res) =>
 
         console.log('converting ppt to pdf...');
 
-        const pdfBuffer = await libre.convertAsync(pptBuffer, ext, undefined);
+        const firstPageFilter = `{"PageRange":{"type":"string","value":"1"}}`;
+
+        const pdfBuffer = await libre.convertAsync(pptBuffer, ext, firstPageFilter);
   
         const {width, height } = await getPDFSizeInInches(pdfBuffer);
 
