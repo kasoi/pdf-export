@@ -20,12 +20,13 @@ router.post('/ppt_preview', async (req, res) =>
 
         if(!pptBuffer) throw new Error("ppt buffer is empty");
 
+        console.log('converting ppt to pdf...');
+
         const pdfBuffer = await libre.convertAsync(pptBuffer, ext, undefined);
   
         const {width, height } = await getPDFSizeInInches(pdfBuffer);
 
         console.log(`width = ${width}, height = ${height}`);
-        console.log('generating smallImage...')
 
         let base64Small = '';
     
