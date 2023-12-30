@@ -8,7 +8,7 @@ import libre from 'libreoffice-convert';
 libre.convertAsync = promisify(libre.convert);
 
 const router = express.Router();
-const ext = '.pdf';
+const ext = 'pdf';
 
 router.post('/ppt_preview', async (req, res) => 
 {
@@ -22,7 +22,7 @@ router.post('/ppt_preview', async (req, res) =>
 
         console.log('converting ppt to pdf...');
 
-        const firstPageFilter = `draw_pdf_Export:{"PageRange":{"type":"string","value":"1"}}`;
+        const firstPageFilter = `calc_pdf_Export:{"PageRange":{"type":"string","value":"1"}}`;
 
         const pdfBuffer = await libre.convertAsync(pptBuffer, ext, firstPageFilter);
   
