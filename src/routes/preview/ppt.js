@@ -22,7 +22,7 @@ router.post('/ppt_preview', async (req, res) =>
 
         console.log('converting ppt to pdf...');
 
-        const firstPageFilter = `impress_pdf_Export:{"PageRange":{"type":"string","value":"1"}}`;
+        const firstPageFilter = `impress_pdf_import:{"PageRange":{"type":"string","value":"1"}}`;
 
         const pdfBuffer = await libre.convertAsync(pptBuffer, ext, firstPageFilter);
   
