@@ -14,6 +14,7 @@ import previewPdfRoute from './routes/preview/pdf.js'
 import previewPptRoute from './routes/preview/ppt.js'
 
 import testQRRoute from './routes/test/qr.js'
+import testPPTRoute from './routes/test/ppt.js'
 
 import { processCacheLoop } from "./submission/cache.js";
 
@@ -42,6 +43,7 @@ app.use(previewPdfRoute);
 app.use(previewPptRoute);
 
 app.use(testQRRoute);
+app.use(testPPTRoute);
 
 http.createServer(app).listen(process.env.HTTP_PORT, () => 
 {
