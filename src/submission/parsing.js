@@ -46,7 +46,7 @@ export function getPosterURL(endpoint, folder, useGroupName, eventid, posterid)
   
 export function getVideoIDFromLink(link) 
 {
-    const regexp = new RegExp(/(?:https*\:\/\/)*(?:www\.)*(?:youtu\.be\/|youtube\.com\/watch\?v\=)([A-Za-z\d]+)/g);
+    const regexp = new RegExp(/(?:https*\:\/\/)*(?:www\.)*(?:youtu\.be\/|youtube\.com\/watch\?v\=)([^&]+)/g);
     const matches = regexp.exec(link);
   
     if(matches && matches.length > 0) 
