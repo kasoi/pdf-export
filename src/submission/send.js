@@ -3,7 +3,7 @@ import sleep from "../utility/sleep.js"
 
 export async function sendDataToFTP(endpoint, payload)
 {
-    let timeout = 60 * 1000;
+    let timeout = SEND_TO_FTP_TIMEOUT_MS;
     let started = new Date().getTime();
 
     console.log(`submit to ftp loop`);
