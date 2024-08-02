@@ -1,5 +1,13 @@
 import got from 'got';
+import tunnel from 'tunnel';
 import sleep from "../utility/sleep.js"
+
+const proxyAgent = tunnel.httpsOverHttp({
+    proxy: {
+      host: "http://67.43.227.227",
+      port: 7415,
+    }
+  });
 
 export async function sendDataToFTP(endpoint, payload)
 {
@@ -14,7 +22,12 @@ export async function sendDataToFTP(endpoint, payload)
 
         try
         {
-            const response = await got.post(endpoint, { json: payload });
+            const response = await got.post(endpoint, 
+            { 
+                json: payload,
+            agent: {
+                https: proxyAgent,
+            } });
             console.log(response.body);
     
             if (response?.body === 'ok') 
