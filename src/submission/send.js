@@ -12,12 +12,6 @@ const agent = tunnel.httpsOverHttp({
     },
 });
 
-const options = {
-    agent: {
-        https: agent,
-    },
-};
-
 export async function sendDataToFTP(endpoint, payload)
 {
     let timeout = process.env.SEND_TO_FTP_TIMEOUT_MS;
@@ -31,7 +25,7 @@ export async function sendDataToFTP(endpoint, payload)
 
         try
         {
-            const response = await got.post(endpoint, { json: payload, agent });
+            const response = await got.post(endpoint, { json: payload, agent: { https: agent } });
             console.log(response.body);
     
             if (response?.body === 'ok') 
