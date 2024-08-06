@@ -1,14 +1,12 @@
 import got from 'got';
 import sleep from "../utility/sleep.js"
-
 import tunnel from 'tunnel'
-
 
 const agent = tunnel.httpsOverHttp({
     proxy: {
-        host: '181.215.71.53',
-        port: 2074,
-        proxyAuth: 'user201796:0ctm5k'
+        host: process.env.PROXY_IP,
+        port: parseInt(process.env.PROXY_PORT),
+        proxyAuth: process.env.PROXY_AUTH
     },
 });
 
