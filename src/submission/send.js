@@ -22,6 +22,7 @@ export async function sendDataToFTP(endpoint, payload)
     && process.env.PROXY_IP 
     && process.env.PROXY_PORT 
     && process.env.PROXY_AUTH) {
+        console.log(`using proxy ${agent.host}:${agent.port}`);
         options.agent = { https: agent };
     }
 
