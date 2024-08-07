@@ -15,6 +15,16 @@ export async function sendDataToFTP(endpoint, payload)
     let timeout = process.env.SEND_TO_FTP_TIMEOUT_MS;
     let started = new Date().getTime();
 
+    const options = { json: payload };
+
+    if(process.env.ACTIVE 
+    && parseInt(process.env.ACTIVE) === 1 
+    && process.env.PROXY_IP 
+    && process.env.PROXY_PORT 
+    && process.env.PROXY_AUTH) {
+        options.agent = { https: agent };
+    }
+
     console.log(`submit to ftp loop`);
 
     while (((new Date().getTime() - started) < timeout))
@@ -23,7 +33,7 @@ export async function sendDataToFTP(endpoint, payload)
 
         try
         {
-            const response = await got.post(endpoint, { json: payload, agent: { https: agent } });
+            const response = await got.post(endpoint, options);
             console.log(response.body);
     
             if (response?.body === 'ok') 
