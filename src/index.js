@@ -15,6 +15,7 @@ import previewPptRoute from './routes/preview/ppt.js'
 
 import testQRRoute from './routes/test/qr.js'
 import testPPTRoute from './routes/test/ppt.js'
+import testWebhook from './routes/test/webhook.js'
 
 import { processCacheLoop } from "./submission/cache.js";
 
@@ -44,6 +45,7 @@ app.use(previewPptRoute);
 
 app.use(testQRRoute);
 app.use(testPPTRoute);
+app.use(testWebhook);
 
 http.createServer(app).listen(process.env.HTTP_PORT, () => 
 {
