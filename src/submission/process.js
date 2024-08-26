@@ -139,6 +139,11 @@ export async function processSubmissionBody(body)
     
     if(!failedSubmissions.has(submissionID)) {
         failedSubmissions.add(submissionID);
+
+        const rawRequest = JSON.parse(body.rawRequest);
+        const posterid = Parser.getRawRequestField(rawRequest, 'posterid', true);
+        const email = Parser.getRawRequestField(rawRequest, 'yourEmail', true);
+        
         notifySubmissionFailed(posterid, submissionID, email, exception.message);
     }
   }

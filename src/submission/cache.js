@@ -31,5 +31,6 @@ export async function processCacheLoop()
     } 
     catch (err) {
       console.log(`ERR: processCacheLoop, exception = ${err}`);
+      setTimeout(processCacheLoop, process.env.PROCESS_LOOP_INTERVAL_MS);
     }
 }
