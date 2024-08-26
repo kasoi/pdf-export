@@ -7,6 +7,7 @@ import https from 'https';
 
 import 'dotenv/config';
 import './utility/console.js'
+import './submission/mailer.js'
 
 import rootRoute from './routes/root.js'
 import submitRoute from './routes/submit.js'

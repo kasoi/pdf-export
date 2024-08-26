@@ -6,6 +6,9 @@ import * as ImageGenerator from "../convert/pdf2img.js"
 import * as Parser from "./parsing.js"
 import { sendDataToFTP } from "./send.js";
 import { moveSubmissionToHistory } from "./save.js"
+import { notifySubmissionFailResolve, notifySubmissionSuccess, notifySubmissionFailed } from './mailer.js';
+
+const failedSubmissions = new Set();
 
 export async function processSubmissionBody(body) 
 {
@@ -118,11 +121,25 @@ export async function processSubmissionBody(body)
             pdfUrl: pdfUrl,
         };
 
-        if(await sendDataToFTP(endpoint, payload)) moveSubmissionToHistory(submissionID, eventid, posterid);
+        if(await sendDataToFTP(endpoint, payload)) {
+            moveSubmissionToHistory(submissionID, eventid, posterid);
+
+            if(failedSubmissions.has(submissionID)) {
+                failedSubmissions.delete(submissionID);
+                notifySubmissionFailResolve(posterid);
+            } else {
+                notifySubmissionSuccess(posterid);
+            }
+        }
   } 
   catch (exception) 
   {
     const errMessage = `ERR: submissionID = ${submissionID}, formTitle = ${formTitle}, exception = ${exception.message}`;
     console.log(errMessage);
+    
+    if(!failedSubmissions.has(submissionID)) {
+        failedSubmissions.add(submissionID);
+        notifySubmissionFailed(posterid, submissionID, email, exception.message);
+    }
   }
 }
