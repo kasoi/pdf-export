@@ -21,7 +21,7 @@ export async function processSubmissionBody(body)
 
         const posterid = Parser.getRawRequestField(rawRequest, 'posterid', true);
         const email = Parser.getRawRequestField(rawRequest, 'yourEmail', true);
-        const abstract = Parser.getRawRequestField(rawRequest, 'posterAbstract', true);
+        const abstract = Parser.replaceLineBreaksWithHtmlBR(Parser.getRawRequestField(rawRequest, 'posterAbstract', true));
         const title = Parser.getRawRequestField(rawRequest, 'theTitle', true);
         const authors = Parser.getRawRequestField(rawRequest, 'thePoster', true);
         const affiliates = Parser.getRawRequestField(rawRequest, 'thePoster24', true);

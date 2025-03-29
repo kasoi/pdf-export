@@ -1,3 +1,10 @@
 node_modules/
 logs.txt
 .env
+submissions-cache
+submissions-history
+test
+*.json
+*.sh
+last-payload.txt
+**.save
