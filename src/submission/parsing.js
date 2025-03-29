@@ -59,6 +59,6 @@ export function getVideoIDFromLink(link)
 
 export function replaceLineBreaksWithHtmlBR(abstractText)
 {
-  const regexp = new RegExp(/\\r\\n/);
+  const regexp = new RegExp(/\\r\\n/g);
   return abstractText.replace(regexp, "<br>");
 }
